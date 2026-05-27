@@ -261,3 +261,107 @@ Include actions:
 - Do NOT include backend/model technical details
 - Do NOT clutter UI
 - Focus on usability and actionability
+
+### CAMERA CONTROL & CONTEXT SYSTEM (CRITICAL ENHANCEMENT)
+
+Enhance the camera inspection feature by adding clear context visibility and dynamic control.
+
+---
+
+### 1. ACTIVE CAMERA HEADER (MANDATORY)
+
+Above the camera feed, always display:
+
+"Viewing: Plant A → Line 2 → Camera CAM-03"
+
+Also include:
+- Shift (A / B / C)
+- Component being inspected
+
+Example:
+"Plant A | Line 2 | Camera CAM-03 | Shift B | Component: Chiller Housing"
+
+👉 This ensures users always know what they are viewing
+
+---
+
+### 2. CAMERA SELECTOR (INTERACTIVE CONTROL)
+
+Provide dropdown or selection controls:
+
+- Select Plant
+- Select Production Line
+- Select Camera
+
+Behavior:
+- Selecting Plant → updates available lines
+- Selecting Line → updates available cameras
+- Selecting Camera → switches live feed
+
+👉 This creates a hierarchical control:
+Plant → Line → Camera
+
+---
+
+### 3. QUICK SWITCH PANEL (SIDE OR BELOW CAMERA)
+
+Display available cameras as clickable cards:
+
+Example:
+- CAM-01 (PASS)
+- CAM-02 (DEFECT)
+- CAM-03 (PASS)
+- CAM-04 (FLAG)
+
+Each card shows:
+- Status (color-coded)
+- Small label
+
+On click:
+→ Switch to that camera instantly
+
+👉 This improves usability and speed
+
+---
+
+### 4. CAMERA STATE VISIBILITY (IMPORTANT)
+
+Visually highlight:
+- Currently selected camera
+- Active plant and line
+
+Example:
+- Bold border / glow
+- Slight enlargement
+
+---
+
+### 5. DEFECT CONTEXT LINKING
+
+When defect appears in:
+- Camera feed
+- Defect queue
+
+Ensure it shows:
+- Plant
+- Line
+- Camera
+
+Example:
+"Surface Crack detected | Plant A | Line 2 | CAM-03"
+
+---
+
+### DESIGN INTENT:
+
+- Make camera feel like a controllable system, not a static display
+- Enable fast navigation across plants and lines
+- Provide clear operational awareness for leadership
+
+---
+
+### CONSTRAINT:
+
+- Keep UI clean and minimal
+- Do not overload with technical/system details
+- Focus on usability and clarity
