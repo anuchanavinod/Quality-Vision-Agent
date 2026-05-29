@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quality Vision Agent Dashboard</title>
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS for perfect layout replication -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons for clean dashboard iconography -->
+    <!-- Lucide Icons framework -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -17,7 +17,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Top Navigation Bar -->
+    <!-- Header / Navigation -->
     <header class="bg-[#0f172a] border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-3">
             <div class="bg-blue-600 p-2 rounded-lg text-white">
@@ -30,6 +30,9 @@
             <button onclick="switchTab('defect-library')" id="btn-defect-library" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-md font-medium text-sm transition">Defect Library</button>
             <button onclick="switchTab('line-analytics')" id="btn-line-analytics" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-md font-medium text-sm transition">Line Analytics</button>
             <button onclick="switchTab('model-intelligence')" id="btn-model-intelligence" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-md font-medium text-sm transition">Model Intelligence</button>
+            <button onclick="switchTab('executive-cockpit')" id="btn-executive-cockpit" class="tab-btn text-slate-400 hover:text-white px-4 py-2 rounded-md font-medium text-sm transition flex items-center gap-1.5">
+                Executive Cockpit <span class="bg-blue-500/20 text-blue-400 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
+            </button>
         </nav>
         <div class="flex items-center space-x-4">
             <span class="flex items-center text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-medium">
@@ -39,10 +42,10 @@
         </div>
     </header>
 
-    <!-- Main Content Layout -->
+    <!-- Content Wrap -->
     <main class="flex-1 p-6 max-w-[1600px] w-full mx-auto space-y-6">
         
-        <!-- Controls & Filters Bar (Global) -->
+        <!-- Controls & Filters -->
         <div class="flex flex-wrap items-center justify-between gap-4 bg-[#0f172a]/60 p-4 rounded-xl border border-slate-800">
             <div class="flex flex-wrap items-center gap-3">
                 <select class="bg-slate-800 border border-slate-700 text-sm rounded-lg px-3 py-2 text-slate-300 focus:outline-none focus:border-blue-500"><option>All Plants</option></select>
@@ -62,6 +65,8 @@
 
         <!-- TAB 1: LIVE INSPECTION -->
         <div id="live-inspection" class="tab-content active space-y-6">
+            
+            <!-- Core Analytics Box -->
             <div class="bg-[#111c44] border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                 <div class="mb-6">
@@ -69,82 +74,283 @@
                     <p class="text-xs text-slate-400 mt-1">Real-time defect detection and AI inference metrics · 8× Industrial Cameras</p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                <!-- Upper Deck Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Parts Inspected</p>
                         <p class="text-3xl font-extrabold text-white mt-1">1,284</p>
                         <span class="text-xs text-slate-500 block mt-1">Today · On-Pace</span>
                     </div>
-                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pass Rate</p>
                         <p class="text-3xl font-extrabold text-emerald-400 mt-1">97.8%</p>
                         <span class="text-xs text-emerald-500 flex items-center mt-1">▲ 0.3pp Vs Target</span>
                     </div>
-                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Defects Found</p>
                         <p class="text-3xl font-extrabold text-amber-500 mt-1">28</p>
                         <span class="text-xs text-amber-500/80 block mt-1">41 Critical · Auto-Rejected</span>
                     </div>
-                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Escape Rate</p>
                         <p class="text-3xl font-extrabold text-blue-400 mt-1">0.4%</p>
                         <span class="text-xs text-emerald-500 flex items-center mt-1">▼ Target Achieved</span>
                     </div>
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800/80">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Inference Time</p>
+                        <p class="text-3xl font-extrabold text-blue-400 mt-1">8ms</p>
+                        <span class="text-xs text-emerald-500 block mt-1">Under 10ms SLA</span>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-6 border-t border-slate-800/60">
-                    <div><span class="text-xs text-slate-400 block font-medium">Total Defects MTD</span><span class="text-xl font-bold text-white block mt-0.5">342</span></div>
-                    <div><span class="text-xs text-slate-400 block font-medium">Critical MTD</span><span class="text-xl font-bold text-white block mt-0.5">41</span></div>
-                    <div><span class="text-xs text-slate-400 block font-medium">Auto-Rejected</span><span class="text-xl font-bold text-white block mt-0.5">318</span></div>
-                    <div><span class="text-xs text-slate-400 block font-medium">Escaped Defects</span><span class="text-xl font-bold text-rose-400 block mt-0.5">5</span></div>
-                    <div><span class="text-xs text-slate-400 block font-medium">Open NCRs</span><span class="text-xl font-bold text-amber-400 block mt-0.5">47</span></div>
-                    <div><span class="text-xs text-slate-400 block font-medium">Inference Time</span><span class="text-xl font-bold text-blue-400 block mt-0.5">8ms</span></div>
+                <!-- Lower Extended Metrics Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-6 border-t border-slate-800/60 text-xs">
+                    <div>
+                        <span class="text-slate-400 font-medium block">Total Defects MTD</span>
+                        <span class="text-xl font-bold text-white block mt-0.5">342</span>
+                        <span class="text-[11px] text-emerald-400">Down 18% Vs Last Month</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium block">Critical MTD</span>
+                        <span class="text-xl font-bold text-white block mt-0.5">41</span>
+                        <span class="text-[11px] text-emerald-400">Down 60% Vs Baseline</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium block">Auto-Rejected</span>
+                        <span class="text-xl font-bold text-white block mt-0.5">318</span>
+                        <span class="text-[11px] text-blue-400">93% Auto · No Manual</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium block">Escaped Defects</span>
+                        <span class="text-xl font-bold text-rose-400 block mt-0.5">5</span>
+                        <span class="text-[11px] text-rose-400/80">0.4% Escape Rate</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium block">Open NCRs</span>
+                        <span class="text-xl font-bold text-amber-400 block mt-0.5">47</span>
+                        <span class="text-[11px] text-slate-500">Pending Review</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium block">Labour Hours Saved</span>
+                        <span class="text-xl font-bold text-emerald-400 block mt-0.5">1,240h</span>
+                        <span class="text-[11px] text-slate-500">MTD vs Baseline</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Middle Split Panels -->
+            <!-- Middle Split Matrix -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- AI Quality Insights Hub -->
                 <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center space-x-2 text-blue-400 mb-4">
-                            <i data-lucide="sparkles" class="w-5 h-5"></i>
-                            <h3 class="font-bold text-white text-base">AI Quality Insights</h3>
+                        <div class="flex items-center justify-between border-b border-slate-800/60 pb-3 mb-4">
+                            <div class="flex items-center space-x-2 text-blue-400">
+                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                <h3 class="font-bold text-white text-base">AI Quality Insights</h3>
+                            </div>
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">AI Generated</span>
                         </div>
-                        <div class="space-y-3">
-                            <div class="p-3 bg-amber-500/5 rounded-xl border border-amber-500/10 text-xs">
-                                <span class="text-amber-400 font-semibold block mb-1">Tooling Wear Flag</span>
-                                Surface Crack rate on Line 3 is 2.4× above plant average — likely tooling wear on Station 7.
+                        <div class="space-y-3 max-h-[310px] overflow-y-auto pr-1">
+                            <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs">
+                                <p class="text-slate-300">Surface Crack rate on Line 3 is 2.4× above plant average — likely tooling wear on Station 7.</p>
+                                <button onclick="alert('Analyzing tooling alignment metrics...')" class="mt-2 text-blue-400 hover:underline font-medium block">Inspect Tooling</button>
+                            </div>
+                            <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs">
+                                <p class="text-slate-300">Line 5 camera (CAM-05B) offline — 86 uninspected parts in the last 2 hours. Manual check recommended.</p>
+                                <button onclick="alert('Flagging uninspected batches...')" class="mt-2 text-blue-400 hover:underline font-medium block">Flag Parts</button>
+                            </div>
+                            <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs">
+                                <p class="text-slate-300">Model confidence on Porosity class has dropped 4.2% this week — retraining recommended.</p>
+                                <button onclick="alert('Initializing pipeline auto-retrain sequence...')" class="mt-2 text-blue-400 hover:underline font-medium block">Retrain Model</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Defect Type Distribution Progress Mix -->
                 <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-5">
-                    <h3 class="font-bold text-white text-base mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-indigo-400"></i> Defect Mix</h3>
-                    <div class="space-y-3.5 text-xs">
-                        <div>Surface Cracks - 41.5%</div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full"><div class="bg-blue-500 h-full w-[41.5%] rounded-full"></div></div>
+                    <h3 class="font-bold text-white text-base mb-4 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-400"></i> Defect Breakdown Mix
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300">Surface Cracks</span><span class="font-semibold text-white">142 (41.5%)</span></div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-blue-500 h-full rounded-full" style="width: 41.5%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300">Dim. Tolerance</span><span class="font-semibold text-white">88 (25.7%)</span></div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-indigo-500 h-full rounded-full" style="width: 25.7%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300">Assembly Align</span><span class="font-semibold text-white">62 (18.1%)</span></div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-amber-500 h-full rounded-full" style="width: 18.1%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300">Foreign Object</span><span class="font-semibold text-white">34 (9.9%)</span></div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-purple-500 h-full rounded-full" style="width: 9.9%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300">Colour Variance</span><span class="font-semibold text-white">16 (4.7%)</span></div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-pink-500 h-full rounded-full" style="width: 4.7%"></div></div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Global Plant Performance Trackers -->
                 <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-5">
-                    <h3 class="font-bold text-white text-base mb-4 flex items-center gap-2"><i data-lucide="globe" class="w-5 h-5 text-emerald-400"></i> Plant Status</h3>
-                    <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-sm text-slate-300">Bangalore, India — 97.6% Pass Rate</div>
+                    <h3 class="font-bold text-white text-base mb-4 flex items-center gap-2">
+                        <i data-lucide="globe" class="w-5 h-5 text-emerald-400"></i> Plant Performance Overview
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-bold block text-white">Bangalore, India</span>
+                                <span class="text-[11px] text-slate-400">4,190 Inspected · 103 Defects</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-base font-extrabold text-emerald-400">97.6%</span>
+                                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase block mt-0.5">Good</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-bold block text-white">Pune, India</span>
+                                <span class="text-[11px] text-slate-400">3,850 Inspected · 135 Defects</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-base font-extrabold text-amber-400">96.5%</span>
+                                <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-bold uppercase block mt-0.5">Warning</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-bold block text-white">Shanghai, China</span>
+                                <span class="text-[11px] text-slate-400">3,760 Inspected · 177 Defects</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-base font-extrabold text-rose-400">95.1%</span>
+                                <span class="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase block mt-0.5">Critical</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Live Camera Feeds Grid -->
+            <!-- Live Camera Streaming Matrices -->
             <div>
-                <h3 class="font-bold text-white text-base mb-4 flex items-center gap-2"><i data-lucide="video" class="w-5 h-5 text-blue-400"></i> Live Camera Feeds</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80')">
-                        <span class="text-xs font-bold text-white">CAM-01A</span>
-                        <span class="text-[10px] text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5 animate-pulse"></span>Line 1</span>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i data-lucide="video" class="w-5 h-5 text-blue-400"></i> Live Camera Feeds
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium">5 Of 6 Online</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.4)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80')">
+                        <div class="flex justify-between items-start"><span class="text-xs font-bold text-white">CAM-01A</span><span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div><span class="text-[11px] font-medium text-slate-200 block">Line 1</span><span class="text-[9px] text-slate-400 block">Bangalore, India</span></div>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1537462715879-360eeb61a0bc?auto=format&fit=crop&w=400&q=80')">
-                        <span class="text-xs font-bold text-white">CAM-02A</span>
-                        <span class="text-[10px] text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5 animate-pulse"></span>Line 2</span>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.4)), url('https://images.unsplash.com/photo-1537462715879-360eeb61a0bc?auto=format&fit=crop&w=300&q=80')">
+                        <div class="flex justify-between items-start"><span class="text-xs font-bold text-white">CAM-02A</span><span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div><span class="text-[11px] font-medium text-slate-200 block">Line 2</span><span class="text-[9px] text-slate-400 block">Pune, India</span></div>
                     </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.4)), url('https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=300&q=80')">
+                        <div class="flex justify-between items-start"><span class="text-xs font-bold text-white">CAM-03B</span><span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div><span class="text-[11px] font-medium text-slate-200 block">Line 3</span><span class="text-[9px] text-slate-400 block">Shanghai, China</span></div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.4)), url('https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=300&q=80')">
+                        <div class="flex justify-between items-start"><span class="text-xs font-bold text-white">CAM-04A</span><span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div><span class="text-[11px] font-medium text-slate-200 block">Line 4</span><span class="text-[9px] text-slate-400 block">Bangalore, India</span></div>
+                    </div>
+                    <div class="bg-slate-950 border border-rose-950/40 rounded-xl aspect-video p-3 flex flex-col justify-between relative">
+                        <div class="absolute inset-0 bg-rose-950/10 flex items-center justify-center"><i data-lucide="video-off" class="w-6 h-6 text-rose-500/50"></i></div>
+                        <div class="z-10 flex justify-between items-start"><span class="text-xs font-bold text-slate-400">CAM-05B</span><span class="text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold px-1.5 py-0.5 rounded">OFFLINE</span></div>
+                        <div class="z-10"><span class="text-[11px] font-medium text-slate-400 block">Line 5</span><span class="text-[9px] text-slate-500 block">Pune, India</span></div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl aspect-video p-3 flex flex-col justify-between relative bg-cover bg-center" style="background-image: linear-gradient(rgba(15,23,42,0.7), rgba(15,23,42,0.4)), url('https://images.unsplash.com/photo-1616401784845-180882ba9ba8?auto=format&fit=crop&w=300&q=80')">
+                        <div class="flex justify-between items-start"><span class="text-xs font-bold text-white">CAM-06C</span><span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div><span class="text-[11px] font-medium text-slate-200 block">Line 6</span><span class="text-[9px] text-slate-400 block">Shanghai, China</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Streaming Real-Time Feed Table Log -->
+            <div class="bg-[#0f172a] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h3 class="font-bold text-white text-base">Live Defect Feed</h3>
+                        <span id="log-count" class="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-medium border border-blue-500/20">50 Records</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs text-slate-400">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+                        <span>Auto-updating stream</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-xs font-semibold text-slate-400 border-b border-slate-800">
+                                <th class="p-4">Time</th>
+                                <th class="p-4">Defect Type</th>
+                                <th class="p-4">Defect ID</th>
+                                <th class="p-4">Plant</th>
+                                <th class="p-4">Line</th>
+                                <th class="p-4">Confidence</th>
+                                <th class="p-4">Camera Used</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Shift</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="defect-rows" class="text-xs divide-y divide-slate-800/60 text-slate-300">
+                            <!-- Real App Dataset Seed Rows -->
+                            <tr class="hover:bg-slate-900/40 transition">
+                                <td class="p-4 font-medium text-slate-400">20:43</td>
+                                <td class="p-4 font-semibold text-white">Surface Crack</td>
+                                <td class="p-4 text-slate-500">DEF-8805</td>
+                                <td class="p-4">Pune, India</td>
+                                <td class="p-4">Line 2</td>
+                                <td class="p-4 font-mono text-emerald-400">88.4%</td>
+                                <td class="p-4 text-slate-400">CAM-02A</td>
+                                <td class="p-4"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[10px]">PASS</span></td>
+                                <td class="p-4 text-slate-400">Shift C</td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="actionItem('DEF-8805', 'Assigned')" class="text-blue-400 hover:underline">Assign</button>
+                                    <button onclick="actionItem('DEF-8805', 'Escalated')" class="text-amber-400 hover:underline">Escalate</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40 transition">
+                                <td class="p-4 font-medium text-slate-400">20:43</td>
+                                <td class="p-4 font-semibold text-white">Porosity</td>
+                                <td class="p-4 text-slate-500">DEF-8804</td>
+                                <td class="p-4">Shanghai, China</td>
+                                <td class="p-4">Line 3</td>
+                                <td class="p-4 font-mono text-emerald-400">85.7%</td>
+                                <td class="p-4 text-slate-400">CAM-03B</td>
+                                <td class="p-4"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[10px]">PASS</span></td>
+                                <td class="p-4 text-slate-400">Shift C</td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="actionItem('DEF-8804', 'Assigned')" class="text-blue-400 hover:underline">Assign</button>
+                                    <button onclick="actionItem('DEF-8804', 'Escalated')" class="text-amber-400 hover:underline">Escalate</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40 transition">
+                                <td class="p-4 font-medium text-slate-400">20:43</td>
+                                <td class="p-4 font-semibold text-white">Edge Chip</td>
+                                <td class="p-4 text-slate-500">DEF-8803</td>
+                                <td class="p-4">Shanghai, China</td>
+                                <td class="p-4">Line 6</td>
+                                <td class="p-4 font-mono text-rose-400">95.1%</td>
+                                <td class="p-4 text-slate-400">CAM-06C</td>
+                                <td class="p-4"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold text-[10px]">HALT</span></td>
+                                <td class="p-4 text-slate-400">Shift B</td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button onclick="actionItem('DEF-8803', 'Assigned')" class="text-blue-400 hover:underline">Assign</button>
+                                    <button onclick="actionItem('DEF-8803', 'Escalated')" class="text-amber-400 hover:underline">Escalate</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -152,24 +358,28 @@
         <!-- TAB 2: DEFECT LIBRARY -->
         <div id="defect-library" class="tab-content space-y-6">
             <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-6">
-                <h2 class="text-xl font-bold text-white mb-2">Defect Taxonomy Library</h2>
-                <p class="text-sm text-slate-400 mb-6">Master catalog of structural anomalies registered within the visual recognition model models.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-4">
-                        <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i data-lucide="activity" class="w-8 h-8"></i></div>
-                        <h4 class="font-bold text-white">Surface Fracture / Crack</h4>
-                        <p class="text-xs text-slate-400 mt-1">Micro structural stress fractures exceeding 0.2mm length specs.</p>
+                <h2 class="text-xl font-bold text-white mb-2">Defect Taxonomy Catalog</h2>
+                <p class="text-sm text-slate-400 mb-6">Centralized image repository mapping geometric defect classes against standard manufacturing benchmarks.</p>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden p-4">
+                        <div class="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-500"><i data-lucide="scan-face" class="w-8 h-8"></i></div>
+                        <h4 class="font-bold text-white text-sm">Surface Crack Anomaly</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Micro structural stress fractures exceeding 0.2mm configuration lengths.</p>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-4">
-                        <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i data-lucide="box" class="w-8 h-8"></i></div>
-                        <h4 class="font-bold text-white">Dimensional Variance</h4>
-                        <p class="text-xs text-slate-400 mt-1">Edge margins drifting out of compliance tolerances on critical axes.</p>
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden p-4">
+                        <div class="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-500"><i data-lucide="rulers" class="w-8 h-8"></i></div>
+                        <h4 class="font-bold text-white text-sm">Dimensional Variance</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Edge margins drifting out of acceptable compliance tolerances on standard axes.</p>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-4">
-                        <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
-                        <h4 class="font-bold text-white">Foreign Object Debris (FOD)</h4>
-                        <p class="text-xs text-slate-400 mt-1">External particulates remaining trapped post assembly tooling injection.</p>
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden p-4">
+                        <div class="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-500"><i data-lucide="layers" class="w-8 h-8"></i></div>
+                        <h4 class="font-bold text-white text-sm">Porosity Degradation</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Internal sub-surface micro cavities discovered via casting material layers.</p>
+                    </div>
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden p-4">
+                        <div class="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-500"><i data-lucide="shield-alert" class="w-8 h-8"></i></div>
+                        <h4 class="font-bold text-white text-sm">Weld Flaw Integrity</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Discontinuous joint structures flagged across target geometric points.</p>
                     </div>
                 </div>
             </div>
@@ -178,10 +388,16 @@
         <!-- TAB 3: LINE ANALYTICS -->
         <div id="line-analytics" class="tab-content space-y-6">
             <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-6">
-                <h2 class="text-xl font-bold text-white mb-4">Production Line Analytical Deck</h2>
-                <div class="p-8 border border-dashed border-slate-800 text-center rounded-xl text-slate-500">
-                    <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-3 text-slate-600"></i>
-                    <p class="text-sm">Historical telemetry stream linked successfully. Select a timeline overview card above to map volumetric yield variables.</p>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Historical Telemetry Stream</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Yield variance trends compared across plants and shifts</p>
+                    </div>
+                    <span class="text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full font-medium">Synced with MES</span>
+                </div>
+                <div class="p-12 border border-dashed border-slate-800 text-center rounded-xl text-slate-500">
+                    <i data-lucide="trending-up" class="w-12 h-12 mx-auto mb-3 text-slate-600"></i>
+                    <p class="text-sm max-w-md mx-auto text-slate-400">Telemetry connection stream verified. Historical charts are mapping data trends dynamically inside system configuration records.</p>
                 </div>
             </div>
         </div>
@@ -189,18 +405,43 @@
         <!-- TAB 4: MODEL INTELLIGENCE -->
         <div id="model-intelligence" class="tab-content space-y-6">
             <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-6">
-                <h2 class="text-xl font-bold text-white mb-2">Model Intelligence & Hyperparameters</h2>
-                <p class="text-sm text-slate-400 mb-6">Manage inference network model deployment metrics and dataset validation distributions.</p>
+                <h2 class="text-xl font-bold text-white mb-2">Model Architecture Parameters</h2>
+                <p class="text-sm text-slate-400 mb-6">Manage live target inference weight adjustments and deep edge computing system values.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                        <span class="text-xs text-slate-400 block uppercase font-bold tracking-wider">Active Vision Core</span>
-                        <div class="text-lg font-bold text-blue-400 mt-1">ResNet-Vision-v4.92</div>
-                        <span class="text-[11px] text-slate-500 block mt-2">Deployed: 4 days ago via central Edge cluster storage.</span>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block uppercase font-bold tracking-wider">Active Edge Cluster Core</span>
+                        <div class="text-lg font-bold text-blue-400 mt-1">ResNet-Vision-Core-v4.92</div>
+                        <p class="text-xs text-slate-500 mt-2">Deployed across central edge systems with less than 8ms baseline latency response.</p>
                     </div>
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                        <span class="text-xs text-slate-400 block uppercase font-bold tracking-wider">Inference Target Score Threshold</span>
-                        <div class="text-lg font-bold text-emerald-400 mt-1">94.5% Global Confidence</div>
-                        <span class="text-[11px] text-slate-500 block mt-2">Adjust system variables inside deployment configurations.</span>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block uppercase font-bold tracking-wider">Global Target Score Threshold</span>
+                        <div class="text-lg font-bold text-emerald-400 mt-1">94.5% Categorical Confidence</div>
+                        <p class="text-xs text-slate-500 mt-2">All anomalies identified beneath this value flag automated manual validation markers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: EXECUTIVE COCKPIT -->
+        <div id="executive-cockpit" class="tab-content space-y-6">
+            <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-white mb-2">Global Executive Quality Overview</h2>
+                <p class="text-sm text-slate-400 mb-6">High-level enterprise visibility mapping multi-plant operational performance.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wide">Enterprise ROI Tracker</div>
+                        <div class="text-2xl font-extrabold text-emerald-400 mt-1">$42,800 saved</div>
+                        <span class="text-[11px] text-slate-500 block mt-1">Calculated via automated manual sorting reduction</span>
+                    </div>
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wide">Total Inspected Month-To-Date</div>
+                        <div class="text-2xl font-extrabold text-white mt-1">114,892 Units</div>
+                        <span class="text-[11px] text-slate-500 block mt-1">99.96% automated data coverage across lines</span>
+                    </div>
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wide">Average Inspection Compliance</div>
+                        <div class="text-2xl font-extrabold text-blue-400 mt-1">99.8% SLA</div>
+                        <span class="text-[11px] text-slate-500 block mt-1">Exceeding standard production targets</span>
                     </div>
                 </div>
             </div>
@@ -208,34 +449,99 @@
 
     </main>
 
-    <!-- UI Interactivity Scripts -->
+    <!-- Interactivity Engine Scripts -->
     <script>
-        // Initialize Lucide SVG Icons
+        // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Dynamically Handle Single Page Tab Switching Logic
+        // Single Page Tab Selector Router Logic
         function switchTab(tabId) {
-            // Hide all tab views
+            // Deactivate all visible layouts
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
 
-            // Remove active styles from navigation choices
+            // Reset navigation selection appearance styles
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-blue-400');
                 btn.classList.add('text-slate-400', 'hover:text-white');
             });
 
-            // Reveal chosen target content layout container
+            // Make designated tab layouts visible
             document.getElementById(tabId).classList.add('active');
 
-            // Apply highlighting to matching activated dashboard link choice
+            // Apply selected highlighting properties to matching link item
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('text-slate-400', 'hover:text-white');
                 activeBtn.classList.add('bg-slate-800', 'text-blue-400');
             }
         }
+
+        // Action items event capture trigger handler
+        function actionItem(id, action) {
+            alert(`Record ${id} successfully flagged for transaction state: ${action}`);
+        }
+
+        // Live Periodic Data Defect Event Stream Simulator
+        const types = ['Surface Crack', 'Porosity', 'Weld Flaw', 'Edge Chip', 'Foreign Object', 'Dimensional Variance'];
+        const environments = [
+            { plant: 'Bangalore, India', line: 'Line 1', cam: 'CAM-01A' },
+            { plant: 'Pune, India', line: 'Line 2', cam: 'CAM-02A' },
+            { plant: 'Shanghai, China', line: 'Line 3', cam: 'CAM-03B' },
+            { plant: 'Bangalore, India', line: 'Line 4', cam: 'CAM-04A' },
+            { plant: 'Shanghai, China', line: 'Line 6', cam: 'CAM-06C' }
+        ];
+        const statusFlags = ['PASS', 'HALT', 'REJECT'];
+        const shifts = ['Shift A', 'Shift B', 'Shift C'];
+        let recordCounter = 50;
+
+        setInterval(() => {
+            const rowBody = document.getElementById('defect-rows');
+            const currentTime = new Date();
+            const timeStr = currentTime.toTimeString().split(' ')[0].substring(0, 5);
+
+            const type = types[Math.floor(Math.random() * types.length)];
+            const env = environments[Math.floor(Math.random() * environments.length)];
+            const status = statusFlags[Math.floor(Math.random() * statusFlags.length)];
+            const shift = shifts[Math.floor(Math.random() * shifts.length)];
+            const accuracy = (Math.random() * (99.5 - 76.0) + 76.0).toFixed(1);
+            const generatedId = `DEF-${Math.floor(Math.random() * 100) + 8806}`;
+
+            let badge = '';
+            if (status === 'HALT') badge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold text-[10px]">HALT</span>`;
+            else if (status === 'REJECT') badge = `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-bold text-[10px]">REJECT</span>`;
+            else badge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[10px]">PASS</span>`;
+
+            const scoreColor = accuracy > 90 ? 'text-emerald-400' : 'text-amber-400';
+
+            const elementRow = document.createElement('tr');
+            elementRow.className = "hover:bg-slate-900/40 transition";
+            elementRow.innerHTML = `
+                <td class="p-4 font-medium text-blue-400">${timeStr}</td>
+                <td class="p-4 font-semibold text-white">${type}</td>
+                <td class="p-4 text-slate-500">${generatedId}</td>
+                <td class="p-4">${env.plant}</td>
+                <td class="p-4">${env.line}</td>
+                <td class="p-4 font-mono ${scoreColor}">${accuracy}%</td>
+                <td class="p-4 text-slate-400">${env.cam}</td>
+                <td class="p-4">${badge}</td>
+                <td class="p-4 text-slate-400">${shift}</td>
+                <td class="p-4 text-right space-x-2">
+                    <button onclick="actionItem('${generatedId}', 'Assigned')" class="text-blue-400 hover:underline">Assign</button>
+                    <button onclick="actionItem('${generatedId}', 'Escalated')" class="text-amber-400 hover:underline">Escalate</button>
+                </td>
+            `;
+
+            rowBody.insertBefore(elementRow, rowBody.firstChild);
+
+            if (rowBody.children.length > 10) {
+                rowBody.removeChild(rowBody.lastChild);
+            }
+
+            recordCounter++;
+            document.getElementById('log-count').innerText = `${recordCounter} Records`;
+        }, 5000);
     </script>
 </body>
 </html>
