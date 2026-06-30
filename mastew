@@ -1,0 +1,115 @@
+I am going to upload multiple screenshots of a solution called “Quality Vision Agent” from a Unified Manufacturing Intelligence Platform.
+
+IMPORTANT CONTEXT:
+- I have to present this solution to senior leadership (my manager's manager - head level).
+- He already understands this domain deeply and may question every detail.
+- My goal is to explain the solution clearly, confidently, and without missing anything.
+- I will be directly reading from your output during my presentation.
+
+---
+
+INSTRUCTIONS (VERY IMPORTANT – FOLLOW STRICTLY):
+
+1. Explain EVERYTHING visible in the screenshots:
+   - Every KPI
+   - Every number
+   - Every chart
+   - Every label
+   - Every button
+   - Every section
+   - Every tab
+
+2. Do NOT summarize or skip anything.
+   I need a ZERO-MISS explanation.
+
+3. For EACH element:
+   - Explain what it means
+   - Explain why it is important
+   - Explain how it is calculated or derived (if applicable)
+
+---
+
+4. VERY IMPORTANT: CHECK FOR DATA / LOGIC ISSUES
+
+For EACH screen:
+- Identify if any numbers don’t match
+- Check if KPIs are inconsistent
+- Check if trends contradict KPIs
+- Check if any value feels unrealistic or incorrect
+- Check if something is missing or unclear
+
+If you find issues:
+- Clearly highlight them under a section:
+  “⚠️ Potential Data Discrepancies / Observations”
+
+- Give possible reasons, such as:
+  - Data lag
+  - Backend mismatch
+  - Filtering issue
+  - Aggregation issue
+
+---
+
+5. EXPLAIN LIKE I AM PRESENTING
+
+Write everything as a SPEAKING SCRIPT:
+- Start from overview
+- Move tab by tab (Dashboard → Defect Log → Line Quality → ML Model, etc.)
+- Use natural spoken sentences
+- Make it smooth and continuous
+
+Example:
+Instead of:
+“This shows defect count”
+
+Write:
+“This metric shows the total number of defects detected today across all lines, which is important to understand real-time quality performance.”
+
+---
+
+6. ALSO PREPARE ME FOR QUESTIONS
+
+At the end of each tab, add:
+
+“Likely Questions + Answers”
+
+Include:
+- Why this KPI matters
+- How it is computed
+- Why value increased/decreased
+- Any possible challenge questions
+
+---
+
+7. EXPLAIN COMPLEX TERMS
+
+Clearly explain:
+- Quality Rate
+- Defect Escape
+- AI Confidence
+- mAP, Precision, Latency
+- Severity levels
+- Federated learning
+- Any AI-related term
+
+Keep it simple but technically correct.
+
+---
+
+8. FINAL OUTPUT FORMAT
+
+Give me:
+
+✅ Full end-to-end speaking script  
+✅ Tab-by-tab explanation  
+✅ Data discrepancy checks  
+✅ Likely questions & answers  
+✅ No missing details  
+
+---
+
+IMPORTANT:
+Do NOT give generic textbook explanations.
+Everything must be based ONLY on the screenshots I provide.
+
+Wait for ALL screenshots before starting.
