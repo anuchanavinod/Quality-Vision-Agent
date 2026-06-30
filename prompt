@@ -1,0 +1,39 @@
+I have uploaded 28 screenshots of a manufacturing intelligence platform.
+
+I want you to explain the ENTIRE solution shown in these screens.
+
+IMPORTANT:
+Explain everything as if I am presenting this to a person who has ZERO knowledge about the solution, manufacturing, or technical concepts.
+
+Your explanation should be:
+
+1. VERY SIMPLE and beginner-friendly
+2. Structured tab by tab and screen by screen
+3. Include EVERY element visible on the screen (KPIs, charts, buttons, labels)
+4. Explain what each field means (not just read values)
+5. Explain WHY it is important (business meaning)
+6. Explain HOW data is coming (live data, systems like MES, SAP, LIMS, OSIsoft PI, etc.)
+7. Explain WHAT actions can be taken (like recommendations, alerts, etc.)
+8. Use real-life simple examples (like cooking or daily life) wherever possible
+9. Give me EXACT sentences I can speak during explanation
+10. Highlight important lines I should say to impress senior stakeholders
+
+Cover the explanation in this order:
+- Unified Overview
+- Semantic Layer
+- OEE Visibility (Dashboard, Six Big Losses, Alerts & Routing, Scorecards)
+- Yield Optimisation (Dashboard, LIMS, DCS, SAP Orders, Benchmarking, ML Model)
+- Quality Vision
+- Predictive Maintenance (if present)
+- Any other modules visible
+
+ALSO:
+- Explain tricky concepts clearly (OEE, Yield, Scrap, RM Waste, Digital Twin, Semantic Layer, ML model, etc.)
+- Explain charts/graphs (what trend means, what to infer)
+- Explain differences between similar KPIs (like scrap vs RM waste)
+- If something looks inconsistent, mention it safely as "under validation"
+
+FINAL OUTPUT:
+Give me a full end-to-end explanation flow that I can literally use in a meeting.
+
+DO NOT SKIP ANY DETAIL FROM THE SCREENSHOTS.
