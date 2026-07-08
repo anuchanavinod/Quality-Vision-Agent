@@ -1,0 +1,3648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quality Vision Agent</title>
+<style>
+/* ============================
+   RESET & BASE
+   ============================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --header-bg: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --cyan: #06b6d4;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ============================
+   HEADER
+   ============================ */
+.header {
+  background: var(--header-bg);
+  height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+  padding-right: 16px;
+}
+
+.logo-text {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav-item {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.nav-item:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
+
+.nav-item.active {
+  color: #ffffff;
+  background: transparent;
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 0;
+  padding-bottom: 4px;
+}
+
+.badge-new {
+  background: #3b82f6;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.vision-live {
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notif-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  position: relative;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+.notif-btn:hover { color: #e2e8f0; }
+
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0 4px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================
+   DOT INDICATORS
+   ============================ */
+.dot-green {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.pulse {
+  animation: pulse-anim 2s infinite;
+}
+@keyframes pulse-anim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ============================
+   CONTENT & PAGES
+   ============================ */
+.content {
+  padding: 20px 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ============================
+   PAGE HEADER & FILTERS
+   ============================ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-select {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 30px 7px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  min-width: 110px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s;
+}
+.filter-select:hover { border-color: #94a3b8; }
+.filter-select:focus { outline: none; border-color: var(--blue); }
+
+.filter-select-sm {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 26px 5px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.btn-export:hover { background: #f8fafc; border-color: #94a3b8; }
+
+.btn-sync {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(59,130,246,0.3);
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-sync:hover { background: #2563eb; }
+
+/* ============================
+   CARD
+   ============================ */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  margin-top: -8px;
+}
+
+/* ============================
+   HERO BANNER
+   ============================ */
+.hero-banner {
+  background: #0f172a;
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.hero-banner h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.hero-banner p {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 28px;
+}
+
+.hero-metric-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-metric-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hero-metric-value.green { color: var(--green); }
+.hero-metric-value.cyan { color: var(--cyan); }
+
+.hero-metric-sub {
+  font-size: 12px;
+  color: #94a3b8;
+}
+.hero-metric-sub.green { color: var(--green); }
+.hero-metric-sub.orange { color: var(--orange); }
+.hero-metric-sub.cyan { color: var(--cyan); }
+
+/* ============================
+   KPI CARDS
+   ============================ */
+.kpi-grid {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-6 { grid-template-columns: repeat(6, 1fr); }
+.kpi-5 { grid-template-columns: repeat(5, 1fr); }
+.kpi-8 { grid-template-columns: repeat(8, 1fr); }
+.kpi-7 { grid-template-columns: repeat(7, 1fr); }
+.kpi-3 { grid-template-columns: repeat(3, 1fr); }
+
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent, #3b82f6);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.kpi-card.kpi-lg .kpi-value { font-size: 32px; }
+
+.kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.kpi-compact { padding: 12px 14px; }
+.kpi-compact .kpi-value { font-size: 20px; }
+
+/* ============================
+   COLOR UTILS
+   ============================ */
+.green { color: var(--green) !important; }
+.red { color: var(--red) !important; }
+.orange { color: var(--orange) !important; }
+.blue { color: var(--blue) !important; }
+.purple { color: var(--purple) !important; }
+.cyan { color: var(--cyan) !important; }
+.muted { color: var(--text-muted) !important; }
+
+/* ============================
+   CHARTS
+   ============================ */
+.chart-container { position: relative; width: 100%; }
+.chart-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.legend-dash {
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.legend-dash.green { background: var(--green); }
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* ============================
+   AI INSIGHTS
+   ============================ */
+.badge-ai {
+  background: #eff6ff;
+  color: var(--blue);
+  border: 1px solid #bfdbfe;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.insights-list { display: flex; flex-direction: column; gap: 10px; }
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  font-size: 13px;
+}
+.insight-red { background: #fff5f5; border-left-color: var(--red); }
+.insight-yellow { background: #fffbeb; border-left-color: var(--orange); }
+.insight-blue { background: #eff6ff; border-left-color: var(--blue); }
+.insight-green { background: #f0fdf4; border-left-color: var(--green); }
+
+.insight-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.insight-text { flex: 1; line-height: 1.4; color: var(--text-primary); }
+.insight-btn {
+  flex-shrink: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--blue);
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.insight-btn:hover { background: #eff6ff; }
+
+/* ============================
+   PLANT PERFORMANCE
+   ============================ */
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.plant-card {
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.plant-good { border-color: #d1fae5; background: #f9fffe; }
+.plant-warning { border-color: #fde68a; background: #fffdf5; }
+.plant-critical { border-color: #fecaca; background: #fffafa; }
+
+.plant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.plant-name { font-size: 15px; font-weight: 600; }
+.plant-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.badge-good { background: #d1fae5; color: #065f46; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-critical { background: #fee2e2; color: #991b1b; }
+
+.plant-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.plant-metric-val { font-size: 20px; font-weight: 800; }
+.plant-metric-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.plant-bar { height: 4px; border-radius: 2px; }
+.plant-bar-green { background: var(--green); }
+.plant-bar-orange { background: var(--orange); }
+.plant-bar-red { background: var(--red); }
+
+/* ============================
+   CAMERA FEEDS
+   ============================ */
+.camera-online { font-size: 13px; color: var(--text-secondary); }
+
+.camera-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.camera-card {
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 90px;
+}
+.cam-live { background: #0f172a; color: white; }
+.cam-offline { background: #f8fafc; color: var(--text-secondary); border: 1px solid var(--border); }
+
+.cam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.cam-id { font-size: 13px; font-weight: 700; }
+.cam-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.02em;
+}
+.badge-live { background: rgba(16,185,129,0.2); color: var(--green); }
+.badge-offline { background: #e2e8f0; color: #64748b; }
+.cam-line { font-size: 12px; margin-bottom: 2px; opacity: 0.85; }
+.cam-location { font-size: 12px; font-weight: 600; }
+
+/* ============================
+   LIVE DEFECT FEED
+   ============================ */
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--green);
+  margin-left: 8px;
+}
+.record-count { font-size: 13px; color: var(--text-secondary); }
+
+/* ============================
+   TABLES
+   ============================ */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.data-table th:hover { color: var(--text-primary); }
+.data-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Table action buttons */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s;
+}
+.btn-assign { background: #eff6ff; color: var(--blue); border-color: #bfdbfe; }
+.btn-assign:hover { background: #dbeafe; }
+.btn-escalate { background: #fff5f5; color: var(--red); border-color: #fecaca; }
+.btn-escalate:hover { background: #fee2e2; }
+.btn-ncr { background: #f8fafc; color: var(--text-secondary); border-color: var(--border); }
+.btn-ncr:hover { background: #f1f5f9; }
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.badge-pass { background: #d1fae5; color: #065f46; }
+.badge-halt { background: #fef3c7; color: #92400e; }
+.badge-reject { background: #fee2e2; color: #991b1b; }
+.badge-escalated { background: #fce7f3; color: #9d174d; }
+.badge-open { background: #fef9c3; color: #713f12; }
+.badge-in-review { background: #eff6ff; color: #1e40af; }
+.badge-closed { background: #d1fae5; color: #065f46; }
+.badge-excellent { background: #d1fae5; color: #065f46; }
+.badge-good-outline { background: #eff6ff; color: #1e40af; }
+.badge-needs-attention { background: #fef3c7; color: #92400e; }
+
+/* Confidence badge */
+.conf-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.conf-high { background: #d1fae5; color: #065f46; }
+.conf-med { background: #fef3c7; color: #92400e; }
+.conf-low-val { background: #fee2e2; color: #991b1b; }
+
+/* ============================
+   NCR SECTION
+   ============================ */
+.ncr-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.ncr-kpi {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.ncr-kpi-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ncr-kpi-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* ============================
+   INFO ICON + TOOLTIP
+   ============================ */
+.info-icon {
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+.info-icon:hover { color: var(--blue); }
+
+.tooltip {
+  position: fixed;
+  background: #0f172a;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 220px;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.tooltip.visible { opacity: 1; }
+
+/* ============================
+   TOAST
+   ============================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+.toast.visible { opacity: 1; transform: translateY(0); }
+
+/* ============================
+   MODAL
+   ============================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.visible { display: flex; }
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 440px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.modal-close:hover { background: #f1f5f9; color: var(--text-primary); }
+.modal-body { padding: 22px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: #f8fafc;
+}
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+.btn-primary {
+  background: var(--blue);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+}
+.btn-primary:hover { background: #2563eb; }
+
+/* ============================
+   RISK PANEL
+   ============================ */
+.risk-list { display: flex; flex-direction: column; gap: 10px; }
+.risk-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.risk-red { background: #fff5f5; border-color: #fecaca; }
+.risk-yellow { background: #fffbeb; border-color: #fde68a; }
+.risk-green { background: #f0fdf4; border-color: #bbf7d0; }
+.risk-icon { font-size: 16px; flex-shrink: 0; }
+.risk-icon-red { color: var(--red); }
+.risk-icon-yellow { color: var(--orange); }
+.risk-icon-green { color: var(--green); }
+.risk-content { flex: 1; }
+.risk-line { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.risk-desc { font-size: 12.5px; color: var(--text-secondary); }
+.risk-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.risk-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.risk-btn:hover { opacity: 0.8; }
+.risk-btn-red { background: #fff5f5; color: var(--red); border-color: #fecaca; }
+.risk-btn-orange { background: #fff7ed; color: var(--orange); border-color: #fed7aa; }
+.risk-btn-blue { background: #eff6ff; color: var(--blue); border-color: #bfdbfe; }
+
+/* ============================
+   PRODUCTION CONFIDENCE
+   ============================ */
+.confidence-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.confidence-card {
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.conf-green { background: #f0fdf4; border-color: #bbf7d0; }
+.conf-red { background: #fff5f5; border-color: #fecaca; }
+.conf-yellow { background: #fffbeb; border-color: #fde68a; }
+.conf-blue { background: #eff6ff; border-color: #bfdbfe; }
+.conf-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; }
+.conf-value { font-size: 40px; font-weight: 900; }
+.conf-note {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+@media (max-width: 1200px) {
+  .kpi-6, .kpi-7, .kpi-8 { grid-template-columns: repeat(4, 1fr); }
+  .hero-metrics { grid-template-columns: repeat(3, 1fr); }
+  .camera-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .two-col-grid { grid-template-columns: 1fr; }
+  .kpi-6, .kpi-5, .kpi-7, .kpi-8, .kpi-3 { grid-template-columns: repeat(2, 1fr); }
+  .kpi-4 { grid-template-columns: repeat(2, 1fr); }
+  .plant-grid { grid-template-columns: 1fr; }
+  .confidence-grid { grid-template-columns: repeat(2, 1fr); }
+  .ncr-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .camera-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-metrics { grid-template-columns: repeat(2, 1fr); }
+  .nav { overflow-x: auto; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 640px) {
+  .content { padding: 12px; }
+  .kpi-6, .kpi-5, .kpi-7, .kpi-8, .kpi-3 { grid-template-columns: 1fr 1fr; }
+  .hero-metrics { grid-template-columns: 1fr 1fr; }
+  .filter-bar { flex-direction: column; align-items: flex-start; }
+  .confidence-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================
+   QUALITY VISION AI CHAT
+   ============================ */
+.qvai-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.qvai-chat-panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  min-height: 520px;
+  max-height: 780px;
+  overflow: hidden;
+}
+
+.qvai-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.qvai-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qvai-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qvai-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.qvai-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.qvai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8fafc;
+}
+
+.qvai-messages::-webkit-scrollbar { width: 5px; }
+.qvai-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.qvai-msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.qvai-msg-row.qvai-msg-user {
+  flex-direction: row-reverse;
+}
+
+.qvai-bot-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qvai-bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.qvai-bubble-bot {
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.qvai-bubble-user {
+  background: var(--blue);
+  color: white;
+  border-top-right-radius: 4px;
+}
+
+.qvai-timestamp {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+.qvai-msg-row.qvai-msg-user .qvai-timestamp {
+  text-align: right;
+  padding-right: 2px;
+}
+
+.qvai-typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  width: fit-content;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.qvai-typing span {
+  width: 7px;
+  height: 7px;
+  background: #94a3b8;
+  border-radius: 50%;
+  animation: typing-bounce 1.2s infinite;
+}
+.qvai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.qvai-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.qvai-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  background: white;
+  flex-shrink: 0;
+}
+
+.qvai-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.qvai-input:focus { border-color: var(--blue); background: white; }
+.qvai-input::placeholder { color: #94a3b8; }
+
+.qvai-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.qvai-send-btn:hover { background: #2563eb; }
+
+.qvai-sidebar {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.qvai-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.qvai-query-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.qvai-query-btn {
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  line-height: 1.3;
+}
+.qvai-query-btn:hover {
+  border-color: var(--blue);
+  background: #eff6ff;
+  color: var(--blue);
+}
+
+.qvai-sidebar-hint {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+/* ============================
+   EXECUTIVE COCKPIT
+   ============================ */
+.exec-kpi {
+  position: relative;
+}
+.exec-kpi-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.exec-kpi-highlight {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1.5px solid #86efac;
+}
+
+.exec-shift-insight {
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border-radius: 6px;
+  line-height: 1.4;
+}
+
+.exec-insight-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.exec-insight-yellow { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.exec-insight-blue   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+/* Defect Distribution Layout */
+.defect-dist-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+  min-height: 260px;
+}
+
+.defect-donut-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.defect-dist-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.defect-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 5px;
+  transition: background 0.12s;
+  user-select: none;
+}
+.defect-legend-item:hover { background: #f1f5f9; }
+.defect-legend-item.hidden-item { opacity: 0.4; text-decoration: line-through; }
+
+.defect-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.defect-legend-name {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.defect-legend-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 38px;
+  text-align: right;
+}
+.defect-legend-pct {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Forecast section */
+.exec-forecast-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.exec-forecast-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.exec-loss-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #065f46;
+}
+
+/* Responsive for new pages */
+@media (max-width: 900px) {
+  .qvai-layout { grid-template-columns: 1fr; }
+  .defect-dist-layout { grid-template-columns: 1fr; }
+  .defect-donut-wrap { margin: 0 auto; }
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#3b82f6" stroke-width="2"/><circle cx="12" cy="12" r="5" stroke="#3b82f6" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="#3b82f6"/></svg>
+      <span class="logo-text">Quality Vision Agent</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item active" data-page="live-inspection">Live Inspection</a>
+    <a class="nav-item" data-page="defect-library">Defect Library</a>
+    <a class="nav-item" data-page="line-analytics">Line Analytics</a>
+    <a class="nav-item" data-page="model-intelligence">Model Intelligence</a>
+    <a class="nav-item" data-page="quality-vision-ai">Quality Vision AI</a>
+    <a class="nav-item" data-page="executive-cockpit">Executive Cockpit <span class="badge-new">NEW</span></a>
+  </nav>
+  <div class="header-right">
+    <span class="vision-live"><span class="dot-green"></span> Vision Live · 97fps</span>
+    <button class="notif-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge">7</span>
+    </button>
+  </div>
+</header>
+
+<!-- PAGES -->
+<div class="content">
+
+  <!-- ===== LIVE INSPECTION PAGE ===== -->
+  <div class="page active" id="page-live-inspection">
+    <div class="page-header">
+      <h1 class="page-title">Live Inspection</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select" id="filter-plant-li">
+            <option>All Plants</option>
+            <option>Bangalore, India</option>
+            <option>Pune, India</option>
+            <option>Shanghai, China</option>
+          </select>
+          <select class="filter-select" id="filter-shift-li">
+            <option>All Shifts</option>
+            <option>Shift A</option>
+            <option>Shift B</option>
+            <option>Shift C</option>
+          </select>
+          <select class="filter-select" id="filter-line-li">
+            <option>All Lines</option>
+            <option>Line 1</option>
+            <option>Line 2</option>
+            <option>Line 3</option>
+            <option>Line 4</option>
+            <option>Line 5</option>
+            <option>Line 6</option>
+          </select>
+          <select class="filter-select" id="filter-date-li">
+            <option>Today</option>
+            <option>Yesterday</option>
+            <option>Last 7 Days</option>
+            <option>This Month</option>
+          </select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h2>Live Vision Inspection</h2>
+        <p>Real-time defect detection and AI inference metrics · 8× Industrial Cameras</p>
+      </div>
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <div class="hero-metric-label">PARTS INSPECTED <span class="info-icon" data-tooltip="Total number of parts scanned by vision cameras today. Compared to daily target pace, this tells operations managers whether the line is running at expected throughput. On-Pace means you are within 5% of target — Off-Pace signals a bottleneck requiring investigation.">ⓘ</span></div>
+          <div class="hero-metric-value">1,284</div>
+          <div class="hero-metric-sub">Today · On-Pace</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hero-metric-label">PASS RATE <span class="info-icon" data-tooltip="Percentage Of Inspected Parts That Passed All Quality Checks. This is your primary quality KPI — the higher the better. Target is 97%. A drop of even 0.5pp can mean thousands of rejected parts and significant rework costs downstream. Track hourly trends to catch degradation early.">ⓘ</span></div>
+          <div class="hero-metric-value green">97.8%</div>
+          <div class="hero-metric-sub green">▲ 0.3pp Vs Target</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hero-metric-label">DEFECTS FOUND <span class="info-icon" data-tooltip="Total number of defect events detected by all cameras today. This includes all severity levels. A rising count mid-shift without a corresponding confidence drop indicates a genuine quality event, not a false alarm — triggering investigation or line halt is recommended.">ⓘ</span></div>
+          <div class="hero-metric-value">28</div>
+          <div class="hero-metric-sub orange">41 Critical · Auto-Rejected</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hero-metric-label">ESCAPE RATE <span class="info-icon" data-tooltip="The escape rate is the most critical risk metric — it measures defects that were NOT caught by the vision system and passed into downstream production or to the customer. Even 0.5% escape rate at 10,000 parts/day = 50 defective parts reaching customers. Target: below 0.5%.">ⓘ</span></div>
+          <div class="hero-metric-value">0.4%</div>
+          <div class="hero-metric-sub green">▼ Target Achieved</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hero-metric-label">INFERENCE TIME <span class="info-icon" data-tooltip="Average time the AI model takes to analyse one camera frame and return a pass/fail decision. Must stay under the SLA of 10ms to avoid slowing the production line. If inference time rises, it may indicate model bloat, hardware load, or network latency — triggering an infrastructure review.">ⓘ</span></div>
+          <div class="hero-metric-value cyan">8ms</div>
+          <div class="hero-metric-sub cyan">Under 10ms SLA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Row 1 -->
+    <div class="kpi-grid kpi-6">
+      <div class="kpi-card" style="--accent:#ef4444">
+        <div class="kpi-label">Total Defects MTD <span class="info-icon" data-tooltip="Total defects detected since the start of the current month. Compare against last month to assess whether quality is improving. A downward trend validates the effectiveness of corrective actions. Each defect avoided saves average $12-$80 in rework and scrap costs depending on the part.">ⓘ</span></div>
+        <div class="kpi-value">342</div>
+        <div class="kpi-sub green">Down 18% Vs Last Month</div>
+      </div>
+      <div class="kpi-card" style="--accent:#f59e0b">
+        <div class="kpi-label">Critical MTD <span class="info-icon" data-tooltip="Count of defects classified as Critical severity this month — these are defects that pose safety risks, cause immediate line halts, or require NCR creation. A 60% reduction vs baseline means the AI system is catching these before they cause downstream failures or customer escapes.">ⓘ</span></div>
+        <div class="kpi-value">41</div>
+        <div class="kpi-sub green">Down 60% Vs Baseline</div>
+      </div>
+      <div class="kpi-card" style="--accent:#3b82f6">
+        <div class="kpi-label">Auto-Rejected <span class="info-icon" data-tooltip="Parts that the AI system flagged and removed from the production line without requiring a human engineer to intervene. 93% auto-rejection rate means only 7% of rejects needed manual review — freeing engineers to focus on root cause analysis rather than manual sorting.">ⓘ</span></div>
+        <div class="kpi-value">318</div>
+        <div class="kpi-sub blue">93% Auto · No Manual</div>
+      </div>
+      <div class="kpi-card" style="--accent:#f59e0b">
+        <div class="kpi-label">Escaped Defects <span class="info-icon" data-tooltip="Defects that were NOT caught during automated inspection and passed through to downstream operations. Each escaped defect represents a potential warranty claim, customer complaint, or safety risk. 5 escaped defects at 0.4% escape rate is within acceptable threshold — above 1% triggers escalation.">ⓘ</span></div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub orange">0.4% Escape Rate</div>
+      </div>
+      <div class="kpi-card" style="--accent:#10b981">
+        <div class="kpi-label">Open NCRs <span class="info-icon" data-tooltip="Open NCRs are formal quality incidents that have been raised but not yet resolved. Each open NCR represents an unresolved quality risk and potential production hold. 47 open NCRs pending review means engineering capacity is needed — escalate if count exceeds 60 without closures trending up.">ⓘ</span></div>
+        <div class="kpi-value">47</div>
+        <div class="kpi-sub orange">Pending Review</div>
+      </div>
+      <div class="kpi-card" style="--accent:#8b5cf6">
+        <div class="kpi-label">Labour Hours Saved <span class="info-icon" data-tooltip="Labour hours saved this month compared to the pre-automation manual inspection baseline. 1,240h saved at average $35/hr = ~$43,400 in direct labour cost avoidance. This metric is the clearest ROI signal for justifying AI quality system investment to finance stakeholders.">ⓘ</span></div>
+        <div class="kpi-value">1,240h</div>
+        <div class="kpi-sub purple">MTD vs Baseline</div>
+      </div>
+    </div>
+
+    <!-- KPI Row 2 - Defect Types -->
+    <div class="kpi-grid kpi-5">
+      <div class="kpi-card" style="--accent:#3b82f6">
+        <div class="kpi-label">Surface Cracks <span class="info-icon" data-tooltip="Count of surface crack defects detected by the vision system. Surface cracks are the highest-volume defect type at 41.5% of total — likely caused by tooling wear, material defects, or thermal stress. Monitoring this weekly helps predict when tooling replacement is due before defect rate spikes.">ⓘ</span></div>
+        <div class="kpi-value">142</div>
+        <div class="kpi-sub muted">41.5% Of Total</div>
+      </div>
+      <div class="kpi-card" style="--accent:#8b5cf6">
+        <div class="kpi-label">Dim. Tolerance <span class="info-icon" data-tooltip="Count of parts where physical dimensions fall outside the specified tolerance range. Dimensional defects indicate CNC machine drift, fixture wear, or material inconsistency. These are highly repeatable — identifying the causal machine or fixture enables targeted preventive maintenance.">ⓘ</span></div>
+        <div class="kpi-value">88</div>
+        <div class="kpi-sub muted">25.7% Of Total</div>
+      </div>
+      <div class="kpi-card" style="--accent:#f59e0b">
+        <div class="kpi-label">Assembly Align <span class="info-icon" data-tooltip="Count of parts where sub-components are misaligned beyond acceptance limits. Assembly alignment defects often indicate jig wear, incorrect feeder settings, or operator technique variation. Tracking by line identifies which assembly station requires recalibration.">ⓘ</span></div>
+        <div class="kpi-value">62</div>
+        <div class="kpi-sub muted">18.1% Of Total</div>
+      </div>
+      <div class="kpi-card" style="--accent:#ef4444">
+        <div class="kpi-label">Foreign Object <span class="info-icon" data-tooltip="Count of parts where foreign material (metal shavings, dust, debris) was detected inside or on the part surface. These are high-severity safety defects — especially in HVAC and compressor products. A spike often indicates a cleaning protocol failure or upstream contamination event.">ⓘ</span></div>
+        <div class="kpi-value">34</div>
+        <div class="kpi-sub muted">9.9% Of Total</div>
+      </div>
+      <div class="kpi-card" style="--accent:#10b981">
+        <div class="kpi-label">Colour Variance <span class="info-icon" data-tooltip="Count of parts where surface colour or coating coverage falls outside visual specification. Colour variance defects may indicate paint thickness inconsistency, curing temperature variation, or batch mixing errors. While typically low-severity, high volume can signal coating process drift.">ⓘ</span></div>
+        <div class="kpi-value">16</div>
+        <div class="kpi-sub muted">4.7% Of Total</div>
+      </div>
+    </div>
+
+    <!-- Pass Rate Trend + AI Insights -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pass Rate Trend — Today <span class="info-icon" data-tooltip="Line chart showing hourly pass rate throughout today's production run, plotted against the 97% target line (dashed). Hover any point to see exact pass rate at that hour. Dips below the target line indicate quality events — correlate with shift handover times, machine warm-up, or material batch changes to identify root causes.">ⓘ</span></span>
+        </div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="passRateTrendChart"></canvas>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dash green"></span> Pass Rate · Target: 97%</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            AI Quality Insights
+          </span>
+          <span class="badge-ai">AI Generated</span>
+        </div>
+        <div class="insights-list">
+          <div class="insight-item insight-red">
+            <span class="insight-icon">⊗</span>
+            <span class="insight-text">Surface Crack rate on Line 3 is 2.4× above plant average — likely tooling wear on Station 7.</span>
+            <button class="insight-btn" onclick="showToast('Navigating to tooling inspection...')">Inspect Tooling</button>
+          </div>
+          <div class="insight-item insight-yellow">
+            <span class="insight-icon">⚠</span>
+            <span class="insight-text">Line 5 camera (CAM-05B) offline — 86 uninspected parts in the last 2 hours. Manual check recommended.</span>
+            <button class="insight-btn" onclick="showToast('Parts flagged for review')">Flag Parts</button>
+          </div>
+          <div class="insight-item insight-blue">
+            <span class="insight-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42"/></svg>
+            </span>
+            <span class="insight-text">Model confidence on Porosity class has dropped 4.2% this week — retraining recommended.</span>
+            <button class="insight-btn" onclick="showToast('Retraining job queued')">Retrain Model</button>
+          </div>
+          <div class="insight-item insight-green">
+            <span class="insight-icon">✓</span>
+            <span class="insight-text">Line 1 has maintained 98%+ pass rate for 7 consecutive shifts — nominated as benchmark line.</span>
+            <button class="insight-btn" onclick="showToast('Generating report...')">View Report</button>
+          </div>
+          <div class="insight-item insight-yellow">
+            <span class="insight-icon">⚠</span>
+            <span class="insight-text">Escape rate spike detected in Shift B, Pune plant — 3 defects passed in last 90 minutes.</span>
+            <button class="insight-btn" onclick="showToast('Launching investigation...')">Investigate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plant Performance Overview -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Plant Performance Overview <span class="info-icon" data-tooltip="Side-by-side plant performance summary showing Pass Rate, Defect Count, and Parts Inspected. Good (green) = above 97% target. Warning (amber) = 95-97%. Critical (red) = below 95%. Use this to direct quality engineering resource to underperforming plants and share best practices from top performers.">ⓘ</span></span>
+      </div>
+      <div class="plant-grid">
+        <div class="plant-card plant-good">
+          <div class="plant-header"><span class="plant-name">Bangalore, India</span><span class="plant-badge badge-good">Good</span></div>
+          <div class="plant-metrics">
+            <div><div class="plant-metric-val green">97.6%</div><div class="plant-metric-label">Pass Rate</div></div>
+            <div><div class="plant-metric-val">103</div><div class="plant-metric-label">Defects</div></div>
+            <div><div class="plant-metric-val">4,190</div><div class="plant-metric-label">Inspected</div></div>
+          </div>
+          <div class="plant-bar plant-bar-green"></div>
+        </div>
+        <div class="plant-card plant-warning">
+          <div class="plant-header"><span class="plant-name">Pune, India</span><span class="plant-badge badge-warning">Warning</span></div>
+          <div class="plant-metrics">
+            <div><div class="plant-metric-val orange">96.5%</div><div class="plant-metric-label">Pass Rate</div></div>
+            <div><div class="plant-metric-val">135</div><div class="plant-metric-label">Defects</div></div>
+            <div><div class="plant-metric-val">3,850</div><div class="plant-metric-label">Inspected</div></div>
+          </div>
+          <div class="plant-bar plant-bar-orange"></div>
+        </div>
+        <div class="plant-card plant-critical">
+          <div class="plant-header"><span class="plant-name">Shanghai, China</span><span class="plant-badge badge-critical">Critical</span></div>
+          <div class="plant-metrics">
+            <div><div class="plant-metric-val red">95.1%</div><div class="plant-metric-label">Pass Rate</div></div>
+            <div><div class="plant-metric-val">177</div><div class="plant-metric-label">Defects</div></div>
+            <div><div class="plant-metric-val">3,760</div><div class="plant-metric-label">Inspected</div></div>
+          </div>
+          <div class="plant-bar plant-bar-red"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Camera Feeds -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Live Camera Feeds</span>
+        <span class="camera-online">5 Of 6 Online</span>
+      </div>
+      <div class="camera-grid">
+        <div class="camera-card cam-live">
+          <div class="cam-header"><span class="cam-id">CAM-01A</span><span class="cam-badge badge-live">● LIVE</span></div>
+          <div class="cam-line">Line 1</div>
+          <div class="cam-location">Bangalore, India</div>
+        </div>
+        <div class="camera-card cam-live">
+          <div class="cam-header"><span class="cam-id">CAM-02A</span><span class="cam-badge badge-live">● LIVE</span></div>
+          <div class="cam-line">Line 2</div>
+          <div class="cam-location">Pune, India</div>
+        </div>
+        <div class="camera-card cam-live">
+          <div class="cam-header"><span class="cam-id">CAM-03B</span><span class="cam-badge badge-live">● LIVE</span></div>
+          <div class="cam-line">Line 3</div>
+          <div class="cam-location">Shanghai, China</div>
+        </div>
+        <div class="camera-card cam-live">
+          <div class="cam-header"><span class="cam-id">CAM-04A</span><span class="cam-badge badge-live">● LIVE</span></div>
+          <div class="cam-line">Line 4</div>
+          <div class="cam-location">Bangalore, India</div>
+        </div>
+        <div class="camera-card cam-offline">
+          <div class="cam-header"><span class="cam-id">CAM-05B</span><span class="cam-badge badge-offline">● OFFLINE</span></div>
+          <div class="cam-line">Line 5</div>
+          <div class="cam-location">Pune, India</div>
+        </div>
+        <div class="camera-card cam-live">
+          <div class="cam-header"><span class="cam-id">CAM-06C</span><span class="cam-badge badge-live">● LIVE</span></div>
+          <div class="cam-line">Line 6</div>
+          <div class="cam-location">Shanghai, China</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Defect Feed Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Live Defect Feed <span class="live-dot"><span class="dot-green pulse"></span> Live</span></span>
+        <span class="record-count">42 Records</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="defectTable">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Defect Type</th>
+              <th>Defect ID</th>
+              <th>Plant</th>
+              <th>Line</th>
+              <th>Confidence</th>
+              <th>Camera Used</th>
+              <th>Status</th>
+              <th>Shift</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="defectTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEFECT LIBRARY PAGE ===== -->
+  <div class="page" id="page-defect-library">
+    <div class="page-header">
+      <h1 class="page-title">Defect Library</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select"><option>All Plants</option><option>Bangalore, India</option><option>Pune, India</option><option>Shanghai, China</option></select>
+          <select class="filter-select"><option>All Shifts</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+          <select class="filter-select"><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option><option>Line 4</option><option>Line 5</option><option>Line 6</option></select>
+          <select class="filter-select"><option>Today</option><option>Yesterday</option><option>Last 7 Days</option><option>This Month</option></select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-grid kpi-8">
+      <div class="kpi-card kpi-compact" style="--accent:#3b82f6"><div class="kpi-label">Total Defects <span class="info-icon" data-tooltip="Cumulative count of all defect records in the defect library for the selected period and filters. This is the master database of quality events — each record links a defect image, classification, severity, plant, line, and resolution status. Use it to identify recurring patterns and prioritise corrective actions.">ⓘ</span></div><div class="kpi-value">342</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#f59e0b"><div class="kpi-label">Auto Rejected <span class="info-icon" data-tooltip="Parts that were automatically removed from the production flow by the AI vision system without human intervention. High auto-rejection rate (currently 93%) means the AI is confidently identifying clear defects — reducing engineer fatigue and increasing throughput speed.">ⓘ</span></div><div class="kpi-value">318</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#ef4444"><div class="kpi-label">Escaped Defects <span class="info-icon" data-tooltip="Defects that passed through the inspection system undetected. This is the most dangerous metric — escaped defects can reach customers, cause product recalls, and generate warranty claims. Analyse escaped defect types to identify gaps in model training data and update the defect catalog.">ⓘ</span></div><div class="kpi-value">5</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#10b981"><div class="kpi-label">Surface Cracks <span class="info-icon" data-tooltip="Number of surface crack defects identified this period. Surface cracks are the most common defect type in this facility. When surface crack count rises sharply on a specific line, it typically indicates tooling wear — schedule a tooling inspection before the defect rate exceeds the 5% alert threshold.">ⓘ</span></div><div class="kpi-value">142</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#8b5cf6"><div class="kpi-label">Assembly Alignment <span class="info-icon" data-tooltip="Count of assembly alignment defects where parts are fitted outside tolerance. Monitoring alignment defects by line and shift helps identify whether the issue is machine-related (consistent on one line) or operator-related (varies by shift). Use to guide targeted training or machine recalibration.">ⓘ</span></div><div class="kpi-value">62</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#ef4444"><div class="kpi-label">Foreign Objects <span class="info-icon" data-tooltip="Foreign object defects are among the most serious quality failures — they indicate contamination in the production environment. These trigger mandatory NCR creation and line investigation. A count above 40/month triggers a mandatory environmental audit of the affected line.">ⓘ</span></div><div class="kpi-value">34</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#3b82f6"><div class="kpi-label">Color Coating <span class="info-icon" data-tooltip="Count of colour or coating defects detected. While cosmetic, these defects directly impact customer satisfaction scores and product return rates. Tracking by batch and production time helps identify correlation with paint line temperature, humidity, or material supplier changes.">ⓘ</span></div><div class="kpi-value">16</div></div>
+      <div class="kpi-card kpi-compact" style="--accent:#f59e0b"><div class="kpi-label">Dimension Rejects <span class="info-icon" data-tooltip="Count of parts rejected due to dimensional non-conformance. At 88 rejections, dimensional issues are the second most common defect type. High dimensional reject counts on specific lines indicate machine calibration drift — schedule CMM (Coordinate Measuring Machine) checks.">ⓘ</span></div><div class="kpi-value">88</div></div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="two-col-grid" style="grid-template-columns: 2fr 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Defect Rate Trend (Hourly) <span class="info-icon" data-tooltip="Combined chart showing parts inspected (blue bars, left axis) and defects found (red line, right axis) by hour. Use this to correlate defect spikes with shift handovers, machine warm-up periods, or specific production batches. A rising defect line with stable inspection volume = genuine quality event.">ⓘ</span></span>
+          <select class="filter-select-sm" id="defectTrendPeriod" onchange="updateDefectTrendChart()">
+            <option>Hourly</option>
+            <option>Daily</option>
+            <option>Weekly</option>
+          </select>
+        </div>
+        <div class="chart-container" style="height:280px">
+          <canvas id="defectRateTrendChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Defect Catalog <span class="info-icon" data-tooltip="Horizontal bar chart ranking defect types by frequency. Bar colours indicate severity level: Red = High severity (safety-critical), Orange = Medium (rework required), Green = Low (cosmetic). Click any bar to instantly filter the NCR table below to show only records of that defect type.">ⓘ</span></span>
+        </div>
+        <p class="chart-subtitle">Click a bar to filter NCR table</p>
+        <div class="chart-container" style="height:260px">
+          <canvas id="defectCatalogChart"></canvas>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:8px;font-size:12px;justify-content:center;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:4px;"></span>High</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:4px;"></span>Medium</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:4px;"></span>Low</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NCR Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" style="font-size:16px;font-weight:700;">Non-Conformance Reports (NCR)</span>
+      </div>
+      <div class="ncr-kpi-grid">
+        <div class="ncr-kpi"><div class="ncr-kpi-label">Open NCRs <span class="info-icon" data-tooltip="Number of Non-Conformance Reports currently in Open status — meaning the defect has been logged but the root cause has not been confirmed and corrective action not yet initiated. High open count with slow closure rate indicates investigation bottleneck — may need additional engineering resource.">ⓘ</span></div><div class="ncr-kpi-val">24</div></div>
+        <div class="ncr-kpi"><div class="ncr-kpi-label">Closed NCRs <span class="info-icon" data-tooltip="Number of NCRs that have been fully investigated, root cause identified, corrective action implemented, and formally closed. Closed NCR count vs open NCR count gives your closure rate — a healthy operation closes more NCRs than it opens each week.">ⓘ</span></div><div class="ncr-kpi-val">142</div></div>
+        <div class="ncr-kpi"><div class="ncr-kpi-label">Avg Resolution Time <span class="info-icon" data-tooltip="Average calendar hours from NCR creation to formal closure. At 18.5h average, this facility is performing above industry benchmark (~24h). Longer resolution times on specific defect types or lines indicate investigation complexity or resource constraints that need management attention.">ⓘ</span></div><div class="ncr-kpi-val">18.5h</div></div>
+        <div class="ncr-kpi"><div class="ncr-kpi-label">Critical NCRs <span class="info-icon" data-tooltip="NCRs classified as Critical severity — these involve safety-critical defects, potential escapes to customers, or regulatory non-compliance risk. Critical NCRs trigger immediate escalation to plant manager level and must be closed within 24 hours per quality protocol.">ⓘ</span></div><div class="ncr-kpi-val red">3</div></div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="ncrTable">
+          <thead>
+            <tr>
+              <th>Defect ID</th>
+              <th>Defect Type</th>
+              <th>Product</th>
+              <th>Plant</th>
+              <th>Line</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Severity</th>
+              <th>NCR ID</th>
+              <th>Resolution Time</th>
+            </tr>
+          </thead>
+          <tbody id="ncrTableBody"></tbody>
+        </table>
+      </div>
+      <div class="card-header" style="margin-top:24px;">
+        <span class="card-title">NCR Trend (Last 6 Weeks) <span class="info-icon" data-tooltip="Weekly NCR counts for the last 6 weeks">ⓘ</span></span>
+      </div>
+      <div class="chart-container" style="height:180px">
+        <canvas id="ncrTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LINE ANALYTICS PAGE ===== -->
+  <div class="page" id="page-line-analytics">
+    <div class="page-header">
+      <h1 class="page-title">Line Analytics</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select"><option>All Plants</option><option>Bangalore, India</option><option>Pune, India</option><option>Shanghai, China</option></select>
+          <select class="filter-select"><option>All Shifts</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+          <select class="filter-select"><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option><option>Line 4</option><option>Line 5</option><option>Line 6</option></select>
+          <select class="filter-select"><option>Today</option><option>Yesterday</option><option>Last 7 Days</option><option>This Month</option></select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid kpi-7">
+      <div class="kpi-card" style="--accent:#3b82f6"><div class="kpi-label">Lines Monitored <span class="info-icon" data-tooltip="Number of production lines currently instrumented with vision inspection cameras. 18 lines across all plants means full facility coverage. Any unmonitored lines represent blind spots where defects can only be caught by manual inspection — target is 100% line coverage.">ⓘ</span></div><div class="kpi-value">18</div></div>
+      <div class="kpi-card" style="--accent:#10b981"><div class="kpi-label">Labour Saved <span class="info-icon" data-tooltip="Percentage reduction in quality inspection labour hours compared to the pre-automation baseline. 34% labour saving means roughly 1 in 3 inspector hours has been redirected to higher-value tasks like root cause analysis and process improvement. Directly reduces quality cost-per-part.">ⓘ</span></div><div class="kpi-value green">34%</div></div>
+      <div class="kpi-card" style="--accent:#3b82f6"><div class="kpi-label">Line Stability Score <span class="info-icon" data-tooltip="Composite score (0–100) measuring how consistently each line performs against its pass rate target. Calculated from variance in hourly pass rate, defect rate trend, and camera uptime. Score of 87.4 is Good — scores below 75 trigger a stability review. Use to benchmark lines against each other.">ⓘ</span></div><div class="kpi-value blue">87.4</div></div>
+      <div class="kpi-card" style="--accent:#1e293b"><div class="kpi-label">Throughput <span class="info-icon" data-tooltip="Total number of parts processed through vision inspection per day across all active lines. At 11,800/day, this represents the productive output rate. Compare against rated capacity to calculate utilisation. A sudden throughput drop below 10,000/day signals a line event requiring investigation.">ⓘ</span></div><div class="kpi-value">11,800/day</div></div>
+      <div class="kpi-card" style="--accent:#ef4444"><div class="kpi-label">Downtime % <span class="info-icon" data-tooltip="Percentage of scheduled production time lost to unplanned downtime events (line halts, camera failures, defect-triggered stops). 3.2% downtime means ~23 minutes lost per 12-hour shift. Industry benchmark is below 5% — track downtime causes to target the largest contributors for elimination.">ⓘ</span></div><div class="kpi-value red">3.2%</div></div>
+      <div class="kpi-card" style="--accent:#10b981">
+        <div class="kpi-label">Best Performing Line <span class="info-icon" data-tooltip="The production line achieving the best pass rate this period. Line 1 at 98.2% is the benchmark — study its operator practices, machine settings, and maintenance schedule to replicate success on underperforming lines. Being named benchmark line is recognition of operational excellence.">ⓘ</span></div>
+        <div class="kpi-value green" style="font-size:20px;">Line 1</div>
+        <div class="kpi-sub green">(98.2%) ↗</div>
+      </div>
+      <div class="kpi-card" style="--accent:#ef4444">
+        <div class="kpi-label">Worst Performing Line <span class="info-icon" data-tooltip="The production line with the lowest pass rate — currently Line 3 at 93.2%, which is 3.8pp below the 97% target. This line requires immediate investigation. Common root causes include tooling wear, operator technique, material batch issues, or machine calibration drift.">ⓘ</span></div>
+        <div class="kpi-value red" style="font-size:20px;">Line 3</div>
+        <div class="kpi-sub red">(93.2%) ↘</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pass Rate By Line (%) <span class="info-icon" data-tooltip="Bar chart ranking all production lines by current pass rate. Green bars = above 97% target (Good), Orange = 95-97% (Warning), Red = below 95% (Critical). Use line ranking to prioritise quality improvement projects and allocate engineering resource to underperformers first.">ⓘ</span></span>
+        </div>
+        <div class="chart-container" style="height:300px">
+          <canvas id="passRateByLineChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Line Downtime (Hours) <span class="info-icon" data-tooltip="Horizontal bar chart showing hours of unplanned downtime per line today. Red bars indicate lines exceeding 3h downtime threshold — these require immediate investigation. Line 3's 4.2h is the highest — correlates with its elevated defect rate and may indicate the same root cause (tooling wear).">ⓘ</span></span>
+        </div>
+        <div class="chart-container" style="height:300px">
+          <canvas id="lineDowntimeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predictive Risk Panel -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠ <strong>Predictive Risk Panel</strong> <span class="info-icon" data-tooltip="AI-generated risk assessment for each production line based on sensor trends, defect rate velocity, and historical patterns. Red = High Risk (immediate action required), Amber = Moderate (monitor closely), Green = Stable (benchmark performance). Clicking Investigate launches a root cause analysis workflow.">ⓘ</span></span>
+        <span class="badge-ai" style="background:#fff7ed;color:#f59e0b;border:1px solid #fed7aa;">AI Predictive</span>
+      </div>
+      <div class="risk-list">
+        <div class="risk-item risk-red">
+          <div class="risk-icon risk-icon-red">△</div>
+          <div class="risk-content">
+            <div class="risk-line">Line 2</div>
+            <div class="risk-desc">High risk of performance drop — Vibration RMS elevated 34% above threshold</div>
+          </div>
+          <div class="risk-actions">
+            <button class="risk-btn risk-btn-red" onclick="showToast('Launching investigation for Line 2...')">🔍 Investigate</button>
+            <button class="risk-btn risk-btn-orange" onclick="showToast('Maintenance scheduled for Line 2')">🔧 Schedule Maintenance</button>
+          </div>
+        </div>
+        <div class="risk-item risk-yellow">
+          <div class="risk-icon risk-icon-yellow">⚠</div>
+          <div class="risk-content">
+            <div class="risk-line">Line 3</div>
+            <div class="risk-desc">Moderate instability — Surface Crack rate has been rising for 3 consecutive shifts</div>
+          </div>
+          <div class="risk-actions">
+            <button class="risk-btn risk-btn-red" onclick="showToast('Launching investigation for Line 3...')">🔍 Investigate</button>
+            <button class="risk-btn risk-btn-blue" onclick="showToast('Monitoring Line 3...')">↗ Monitor</button>
+          </div>
+        </div>
+        <div class="risk-item risk-green">
+          <div class="risk-icon risk-icon-green">✓</div>
+          <div class="risk-content">
+            <div class="risk-line">Line 5</div>
+            <div class="risk-desc">Stable &amp; reliable — Pass rate consistently above 95% for 14 days</div>
+          </div>
+          <div class="risk-actions">
+            <button class="risk-btn risk-btn-blue" onclick="showToast('Monitoring Line 5...')">↗ Monitor</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Performance Summary -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Line Performance Summary</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="linePerformanceTable">
+          <thead>
+            <tr>
+              <th>Line</th>
+              <th>Pass Rate</th>
+              <th>Inspections</th>
+              <th>Defects</th>
+              <th>Status</th>
+              <th>vs. Target (97%)</th>
+            </tr>
+          </thead>
+          <tbody id="linePerformanceBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODEL INTELLIGENCE PAGE ===== -->
+  <div class="page" id="page-model-intelligence">
+    <div class="page-header">
+      <h1 class="page-title">Model Intelligence</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select"><option>All Plants</option><option>Bangalore, India</option><option>Pune, India</option><option>Shanghai, China</option></select>
+          <select class="filter-select"><option>All Shifts</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+          <select class="filter-select"><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option><option>Line 4</option><option>Line 5</option><option>Line 6</option></select>
+          <select class="filter-select"><option>Today</option><option>Yesterday</option><option>Last 7 Days</option><option>This Month</option></select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <!-- Top KPIs -->
+    <div class="kpi-grid kpi-3">
+      <div class="kpi-card kpi-lg" style="--accent:#3b82f6"><div class="kpi-label">Precision <span class="info-icon" data-tooltip="Precision = True Positives ÷ (True Positives + False Positives). Measures how often the AI is correct when it flags a defect. 96.1% precision means that for every 100 defect alerts, 96 are genuine defects and 4 are false alarms. High precision reduces unnecessary line halts and engineer review time.">ⓘ</span></div><div class="kpi-value" style="font-size:32px;">96.1%</div></div>
+      <div class="kpi-card kpi-lg" style="--accent:#10b981"><div class="kpi-label">Recall <span class="info-icon" data-tooltip="Recall = True Positives ÷ (True Positives + False Negatives). Measures how many real defects the AI successfully catches. 95.4% recall means the model catches 95.4% of all actual defects — 4.6% are missed (False Negatives). Recall is more safety-critical than precision in manufacturing quality.">ⓘ</span></div><div class="kpi-value" style="font-size:32px;">95.4%</div></div>
+      <div class="kpi-card kpi-lg" style="--accent:#8b5cf6"><div class="kpi-label">Latency <span class="info-icon" data-tooltip="Average time for the AI model to process one camera frame and produce a quality decision. At 8.0ms, the system comfortably meets the 10ms SLA. If latency exceeds 10ms, the camera queue backs up and parts pass without inspection. Monitor under peak load conditions — latency typically rises at P99.">ⓘ</span></div><div class="kpi-value" style="font-size:32px;">8.0 ms</div></div>
+    </div>
+
+    <!-- Production Confidence Panel -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Production Confidence Panel <span class="info-icon" data-tooltip="The four quadrants of model prediction accuracy: True Positives (correctly flagged defects), False Positives (good parts incorrectly flagged — waste), False Negatives (missed defects — safety risk), True Negatives (correctly passed good parts). Minimising False Negatives is the top priority in safety-critical manufacturing.">ⓘ</span></span>
+      </div>
+      <div class="confidence-grid">
+        <div class="confidence-card conf-green">
+          <div class="conf-label">True Positives (TP)</div>
+          <div class="conf-value green">384</div>
+        </div>
+        <div class="confidence-card conf-red">
+          <div class="conf-label">False Positives (FP)</div>
+          <div class="conf-value red">11</div>
+        </div>
+        <div class="confidence-card conf-yellow">
+          <div class="conf-label">False Negatives (FN)</div>
+          <div class="conf-value orange">17</div>
+        </div>
+        <div class="confidence-card conf-blue">
+          <div class="conf-label">True Negatives (TN)</div>
+          <div class="conf-value blue">1208</div>
+        </div>
+      </div>
+      <p class="conf-note">Surface Crack And Foreign Object Classes Are The Most Reliable. False Negatives (17) Represent The Highest Risk — Missed Defects That Escaped To Downstream Processes.</p>
+    </div>
+
+    <!-- Feature Importance + Latency Percentiles -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Feature Importance <span class="info-icon" data-tooltip="The sensor and image features that most influence the AI model's defect classification decisions. Vibration RMS (34%) and Thermal Delta (24%) together drive 58% of predictions — meaning machine vibration and temperature are the strongest signals of upcoming defect events. Use this to guide predictive maintenance priorities.">ⓘ</span></span>
+        </div>
+        <div class="chart-container" style="height:260px">
+          <canvas id="featureImportanceChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Inference Latency Percentiles <span class="info-icon" data-tooltip="Shows inference latency at different load percentiles: P50 is the typical case, P99 is worst-case. The gap between P50 (6.2ms) and P99 (8.5ms) is small — indicating consistent performance. If P99 exceeds 10ms SLA, investigate infrastructure bottlenecks (GPU memory, network, camera buffer size).">ⓘ</span></span>
+        </div>
+        <div class="chart-container" style="height:260px">
+          <canvas id="latencyPercentilesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Performance Insights Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Model Performance Insights <span class="info-icon" data-tooltip="Breakdown of AI model accuracy for each defect type. Detection Rate is recall per class — how often the model catches that defect type. False Positive Rate is how often good parts are wrongly flagged as that defect. Porosity's Needs Attention status (91.2% detection, 3.4% FPR) means more training images are needed for this class.">ⓘ</span></span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Defect Class</th>
+              <th>Detection Rate</th>
+              <th>False Positive Rate</th>
+              <th>Confidence Avg</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Surface Crack</td><td class="green">99.1%</td><td class="red">0.8%</td><td>97.4%</td><td><span class="status-badge badge-excellent">Excellent</span></td></tr>
+            <tr><td>Foreign Object</td><td class="green">98.4%</td><td class="red">1.1%</td><td>96.8%</td><td><span class="status-badge badge-excellent">Excellent</span></td></tr>
+            <tr><td>Dimensional Variance</td><td class="green">94.2%</td><td class="red">1.9%</td><td>92.1%</td><td><span class="status-badge badge-good-outline">Good</span></td></tr>
+            <tr><td>Coating Defect</td><td class="green">97.8%</td><td class="red">1.3%</td><td>95.5%</td><td><span class="status-badge badge-excellent">Excellent</span></td></tr>
+            <tr><td>Weld Flaw</td><td class="green">95.6%</td><td class="red">2.1%</td><td>93.7%</td><td><span class="status-badge badge-good-outline">Good</span></td></tr>
+            <tr><td>Porosity</td><td class="green">91.2%</td><td class="red">3.4%</td><td>88.9%</td><td><span class="status-badge badge-needs-attention">Needs Attention</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== QUALITY VISION AI PAGE ===== -->
+  <div class="page" id="page-quality-vision-ai">
+    <div class="page-header">
+      <h1 class="page-title">Quality Vision AI</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select"><option>All Plants</option><option>Bangalore, India</option><option>Pune, India</option><option>Shanghai, China</option></select>
+          <select class="filter-select"><option>All Shifts</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+          <select class="filter-select"><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option><option>Line 4</option><option>Line 5</option><option>Line 6</option></select>
+          <select class="filter-select"><option>Today</option><option>Yesterday</option><option>Last 7 Days</option><option>This Month</option></select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <div class="qvai-layout">
+      <!-- Chat Panel -->
+      <div class="qvai-chat-panel">
+        <div class="qvai-chat-header">
+          <div class="qvai-chat-title">
+            <div class="qvai-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <span class="qvai-name">Quality Vision AI</span>
+          </div>
+          <span class="qvai-status"><span class="dot-green" style="width:8px;height:8px;"></span> Online</span>
+        </div>
+        <div class="qvai-messages" id="qvaiMessages">
+          <div class="qvai-msg-row qvai-msg-bot">
+            <div class="qvai-bot-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div>
+              <div class="qvai-bubble qvai-bubble-bot">Welcome To Quality Vision AI. Ask Me Anything About Your Manufacturing Quality Data.</div>
+              <div class="qvai-timestamp" id="qvaiInitTime"></div>
+            </div>
+          </div>
+        </div>
+        <div class="qvai-input-row">
+          <input class="qvai-input" id="qvaiInput" type="text" placeholder="Ask About Plant Performance, Defects, Or Model Accuracy..." onkeydown="if(event.key==='Enter') sendQVAIMessage()" />
+          <button class="qvai-send-btn" onclick="sendQVAIMessage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Suggested Queries Sidebar -->
+      <div class="qvai-sidebar">
+        <div class="qvai-sidebar-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span>SUGGESTED QUERIES</span>
+        </div>
+        <div class="qvai-query-list">
+          <button class="qvai-query-btn" onclick="sendSuggestedQuery('What Are The Top Defects In Shift B?')">What Are The Top Defects In Shift B?</button>
+          <button class="qvai-query-btn" onclick="sendSuggestedQuery('Which Plant Has The Highest Reject Rate?')">Which Plant Has The Highest Reject Rate?</button>
+          <button class="qvai-query-btn" onclick="sendSuggestedQuery('Why Did False Positives Increase?')">Why Did False Positives Increase?</button>
+          <button class="qvai-query-btn" onclick="sendSuggestedQuery('Show Worst Performing Line Today')">Show Worst Performing Line Today</button>
+          <button class="qvai-query-btn" onclick="sendSuggestedQuery('What Is Model Accuracy Trend?')">What Is Model Accuracy Trend?</button>
+        </div>
+        <p class="qvai-sidebar-hint">Click A Suggested Query Or Type Your Own Question. The AI References Live KPIs, Defect Logs, And Model Metrics.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXECUTIVE COCKPIT PAGE ===== -->
+  <div class="page" id="page-executive-cockpit">
+    <div class="page-header">
+      <h1 class="page-title">Executive Cockpit</h1>
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select"><option>All Plants</option><option>Bangalore, India</option><option>Pune, India</option><option>Shanghai, China</option></select>
+          <select class="filter-select"><option>All Shifts</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+          <select class="filter-select"><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option><option>Line 4</option><option>Line 5</option><option>Line 6</option></select>
+          <select class="filter-select"><option>Today</option><option>Yesterday</option><option>Last 7 Days</option><option>This Month</option></select>
+        </div>
+        <button class="btn-export" onclick="exportNCRs()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export NCRs</button>
+        <button class="btn-sync" onclick="syncMES()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES</button>
+      </div>
+    </div>
+
+    <!-- Executive KPI Cards -->
+    <div class="kpi-grid kpi-6">
+      <div class="kpi-card exec-kpi" style="--accent:#3b82f6">
+        <div class="exec-kpi-icon" style="color:#3b82f6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><bolt/><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>⚡
+        </div>
+        <div class="kpi-label">Downtime Avoided <span class="info-icon" data-tooltip="Total production downtime prevented by automated defect detection this month. Every hour saved is direct revenue — at 500 parts/hr, 148h avoided = ~74,000 extra parts inspected. Helps executives justify automation investment.">ⓘ</span></div>
+        <div class="kpi-value">148h</div>
+        <div class="kpi-sub green">↑ 22% vs Last Month</div>
+      </div>
+      <div class="kpi-card exec-kpi exec-kpi-highlight" style="--accent:#10b981">
+        <div class="exec-kpi-icon" style="color:#10b981">🛡️</div>
+        <div class="kpi-label">Cost Saved ($) <span class="info-icon" data-tooltip="Total monetary savings from automated quality inspection vs manual inspection baseline. Includes labour cost reduction, rework cost avoidance, and warranty claim prevention. The single most important ROI metric for board-level reporting.">ⓘ</span></div>
+        <div class="kpi-value" style="color:#10b981;font-size:22px;">$284,600</div>
+        <div class="kpi-sub green">↑ 18% vs Last Month</div>
+      </div>
+      <div class="kpi-card exec-kpi" style="--accent:#8b5cf6">
+        <div class="exec-kpi-icon" style="color:#8b5cf6">📈</div>
+        <div class="kpi-label">Productivity Gain <span class="info-icon" data-tooltip="Throughput improvement compared to manual inspection baseline. A 34% gain means each line now inspects 34% more parts per hour with the same headcount. Directly reduces cost-per-unit and improves OEE (Overall Equipment Effectiveness).">ⓘ</span></div>
+        <div class="kpi-value">34%</div>
+        <div class="kpi-sub muted">vs Manual Inspection</div>
+      </div>
+      <div class="kpi-card exec-kpi" style="--accent:#f59e0b">
+        <div class="exec-kpi-icon" style="color:#f59e0b">🔧</div>
+        <div class="kpi-label">Rework Reduction <span class="info-icon" data-tooltip="Reduction in rework events month-to-date vs baseline. Rework is one of the highest hidden costs in manufacturing — each rework event costs 2-5× the original production cost. A 61% reduction signals significant quality maturity.">ⓘ</span></div>
+        <div class="kpi-value">61%</div>
+        <div class="kpi-sub green">↓ Rework Events MTD</div>
+      </div>
+      <div class="kpi-card exec-kpi" style="--accent:#06b6d4">
+        <div class="exec-kpi-icon" style="color:#06b6d4">⚙️</div>
+        <div class="kpi-label">Inspection Efficiency <span class="info-icon" data-tooltip="Percentage of parts automatically cleared by AI without human review. 93% means only 7% of inspected parts require engineer intervention — dramatically reducing bottlenecks and enabling lean quality operations.">ⓘ</span></div>
+        <div class="kpi-value">93%</div>
+        <div class="kpi-sub blue">Parts Auto-Cleared</div>
+      </div>
+      <div class="kpi-card exec-kpi" style="--accent:#ef4444">
+        <div class="exec-kpi-icon" style="color:#ef4444">⚡</div>
+        <div class="kpi-label">Line Utilization <span class="info-icon" data-tooltip="Average percentage of time production lines are actively running vs scheduled capacity. 87% utilization means 13% idle time — identify idle causes (maintenance, changeover, defect halts) to unlock further throughput gains.">ⓘ</span></div>
+        <div class="kpi-value">87%</div>
+        <div class="kpi-sub green">↑ 4pp vs Last Month</div>
+      </div>
+    </div>
+
+    <!-- Pass Rate vs Critical Defects + Defect Rate by Shift -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pass Rate vs Critical Defects by Plant
+            <span class="info-icon" data-tooltip="Grouped bar chart comparing three key metrics across plants: Pass Rate % (dark navy), Critical Defects count (red), and Open NCRs (orange). Allows executives to spot which plants are underperforming and where quality risk is concentrated — enabling targeted intervention decisions.">ⓘ</span>
+          </span>
+        </div>
+        <div class="chart-container" style="height:280px">
+          <canvas id="execPlantChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Defect Rate by Shift
+            <span class="info-icon" data-tooltip="Compares defect rate (%) and critical defect count across Morning, Afternoon, and Night shifts. Shift-level variation reveals operator fatigue patterns, handover gaps, and inspection consistency issues — helping managers schedule targeted training or adjust shift staffing.">ⓘ</span>
+          </span>
+        </div>
+        <div class="chart-container" style="height:280px">
+          <canvas id="execShiftChart"></canvas>
+        </div>
+        <p class="exec-shift-insight">● Afternoon shift has the highest defect rate — review operator fatigue and inspection frequency</p>
+      </div>
+    </div>
+
+    <!-- Defect Distribution + Operational Delay Trend -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Defect Distribution
+            <span class="info-icon" data-tooltip="Donut chart showing the share of each defect type across all inspections this period. Helps executives prioritise quality improvement resources — the largest segments represent the highest volume defect types and should be addressed first for maximum ROI. Click legend items to toggle visibility.">ⓘ</span>
+          </span>
+        </div>
+        <div class="defect-dist-layout">
+          <div class="defect-donut-wrap">
+            <canvas id="execDonutChart"></canvas>
+          </div>
+          <div class="defect-dist-legend" id="execDonutLegend"></div>
+        </div>
+        <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;">Click legend items to toggle visibility</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Operational Delay Trend
+            <span class="info-icon" data-tooltip="Stacked area chart showing cumulative operational delay hours (inspection delays, rework time, line halts) day-by-day over the month. A rising trend is an early warning of process degradation. Layers represent different delay causes — identify which layer is growing fastest to direct corrective action.">ⓘ</span>
+          </span>
+        </div>
+        <div class="exec-insight-box exec-insight-yellow" style="margin-bottom:12px;">
+          <span style="font-size:13px;">🤖</span>
+          <span>Rework and inspection delays are rising over the last 7 days — likely driven by tooling wear on Line 3.</span>
+        </div>
+        <div class="chart-container" style="height:240px">
+          <canvas id="execDelayChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Quality Forecast Panel -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" style="gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          AI Quality Forecast &amp; Production Risk Insights
+          <span class="badge-ai" style="background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;font-size:10px;padding:2px 8px;">AI-Powered</span>
+          <span class="info-icon" data-tooltip="AI-generated defect rate forecast for the next 8 hours based on historical patterns, current line performance, and sensor data. The orange 'Quality Loss ($k)' line projects financial impact if no action is taken. Use this to proactively adjust line loads and prevent quality escapes before they occur.">ⓘ</span>
+        </span>
+        <span style="font-size:12px;color:#10b981;font-weight:600;display:flex;align-items:center;gap:5px;"><span class="dot-green pulse"></span> Updated 14:32</span>
+      </div>
+      <div class="exec-forecast-insight">
+        <span style="font-size:14px;">🤖</span>
+        <span><strong>AI Insight:</strong> Defect risk is expected to peak between 16:00–18:00, especially on Line 2 and Line 3. Predicted defect rate of 5.2% exceeds the 5% alert threshold — pre-emptive line load adjustment recommended.</span>
+      </div>
+      <div class="exec-forecast-actions">
+        <div class="exec-loss-badge">
+          <span>🛡️</span>
+          <span>Estimated Loss Avoidance: <strong>$18,400 if action taken now</strong></span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="risk-btn risk-btn-blue" onclick="showToast('Optimizing inspection schedules...')">△ Optimize Inspection</button>
+          <button class="risk-btn risk-btn-orange" onclick="showToast('Adjusting line load balance...')">⚠ Adjust Line Load</button>
+          <button class="risk-btn risk-btn-red" onclick="showToast('Initiating risk reduction protocol...')">△ Reduce Risk</button>
+        </div>
+      </div>
+      <div class="chart-container" style="height:300px;margin-top:12px;">
+        <canvas id="execForecastChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Action</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="closeModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Quality Vision Agent — script.js
+   ============================================================ */
+
+// ============================================================
+// DATA
+// ============================================================
+const defectData = [
+  { time:'17:44', type:'Porosity',            id:'DEF-8516', plant:'Shanghai, China', line:'Line 6', conf:78.8, camera:'CAM-06C', status:'REJECT', shift:'Shift A' },
+  { time:'17:44', type:'Weld Flaw',           id:'DEF-8515', plant:'Shanghai, China', line:'Line 3', conf:97.6, camera:'CAM-03B', status:'HALT',   shift:'Shift A' },
+  { time:'17:44', type:'Assembly Alignment',  id:'DEF-8514', plant:'Pune, India',     line:'Line 2', conf:87.8, camera:'CAM-02A', status:'HALT',   shift:'Shift A' },
+  { time:'17:44', type:'Edge Chip',           id:'DEF-8513', plant:'Pune, India',     line:'Line 2', conf:82.0, camera:'CAM-02A', status:'HALT',   shift:'Shift A' },
+  { time:'17:44', type:'Edge Chip',           id:'DEF-8512', plant:'Bangalore, India',line:'Line 1', conf:91.1, camera:'CAM-01A', status:'PASS',   shift:'Shift B' },
+  { time:'17:43', type:'Foreign Object',      id:'DEF-8511', plant:'Pune, India',     line:'Line 5', conf:80.7, camera:'CAM-05B', status:'HALT',   shift:'Shift C' },
+  { time:'17:43', type:'Porosity',            id:'DEF-8510', plant:'Shanghai, China', line:'Line 3', conf:89.0, camera:'CAM-03B', status:'HALT',   shift:'Shift C' },
+  { time:'17:42', type:'Surface Crack',       id:'DEF-8509', plant:'Bangalore, India',line:'Line 1', conf:95.3, camera:'CAM-01A', status:'REJECT', shift:'Shift A' },
+  { time:'17:42', type:'Weld Flaw',           id:'DEF-8508', plant:'Shanghai, China', line:'Line 6', conf:76.2, camera:'CAM-06C', status:'HALT',   shift:'Shift B' },
+  { time:'17:41', type:'Coating Defect',      id:'DEF-8507', plant:'Pune, India',     line:'Line 4', conf:88.5, camera:'CAM-04A', status:'PASS',   shift:'Shift A' },
+  { time:'17:41', type:'Dimensional Variance',id:'DEF-8506', plant:'Bangalore, India',line:'Line 2', conf:93.4, camera:'CAM-02A', status:'REJECT', shift:'Shift B' },
+  { time:'17:40', type:'Surface Crack',       id:'DEF-8505', plant:'Shanghai, China', line:'Line 3', conf:84.7, camera:'CAM-03B', status:'HALT',   shift:'Shift C' },
+];
+
+const ncrData = [
+  { id:'DEF-8492', type:'Surface Crack',       product:'HVAC Compressor A4', plant:'Bangalore, India', line:'Line 3', date:'28/05/2026', status:'Escalated', severity:'High',   ncrId:'NCR-1042', resolution:'N/A' },
+  { id:'DEF-8489', type:'Dimensional Variance',product:'Chiller Unit B2',    plant:'Shanghai, China',  line:'Line 2', date:'27/05/2026', status:'Open',      severity:'Medium', ncrId:'NCR-1041', resolution:'N/A' },
+  { id:'DEF-8491', type:'Foreign Object',      product:'Fan Coil Unit C1',   plant:'Pune, India',      line:'Line 5', date:'26/05/2026', status:'In Review', severity:'High',   ncrId:'NCR-1040', resolution:'12h' },
+  { id:'DEF-8488', type:'Coating Defect',      product:'HVAC Compressor A4', plant:'Bangalore, India', line:'Line 1', date:'25/05/2026', status:'Closed',    severity:'Low',    ncrId:'NCR-1039', resolution:'8h' },
+  { id:'DEF-8487', type:'Weld Flaw',           product:'Condenser Unit D3',  plant:'Shanghai, China',  line:'Line 6', date:'24/05/2026', status:'Closed',    severity:'High',   ncrId:'NCR-1038', resolution:'22h' },
+  { id:'DEF-8490', type:'Edge Chip',           product:'Fan Coil Unit C1',   plant:'Pune, India',      line:'Line 4', date:'23/05/2026', status:'Open',      severity:'Medium', ncrId:'NCR-1037', resolution:'N/A' },
+  { id:'DEF-8486', type:'Porosity',            product:'Chiller Unit B2',    plant:'Bangalore, India', line:'Line 3', date:'22/05/2026', status:'Closed',    severity:'Medium', ncrId:'NCR-1036', resolution:'31h' },
+  { id:'DEF-8485', type:'Scratch',             product:'HVAC Compressor A4', plant:'Pune, India',      line:'Line 2', date:'21/05/2026', status:'Closed',    severity:'Low',    ncrId:'NCR-1035', resolution:'6h' },
+];
+
+const linePerformanceData = [
+  { line:'Line 1', passRate:98.2, inspections:2140, defects:38,  status:'Good',    vsTarget:'+1.2pp' },
+  { line:'Line 2', passRate:97.5, inspections:1980, defects:49,  status:'Good',    vsTarget:'+0.5pp' },
+  { line:'Line 6', passRate:97.1, inspections:2010, defects:58,  status:'Good',    vsTarget:'+0.1pp' },
+  { line:'Line 4', passRate:96.8, inspections:2050, defects:65,  status:'Warning', vsTarget:'-0.2pp' },
+  { line:'Line 5', passRate:95.4, inspections:1870, defects:86,  status:'Warning', vsTarget:'-1.6pp' },
+  { line:'Line 3', passRate:93.2, inspections:1750, defects:119, status:'Critical',vsTarget:'-3.8pp' },
+];
+
+// ============================================================
+// NAV
+// ============================================================
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    const pageId = 'page-' + item.dataset.page;
+    const page = document.getElementById(pageId);
+    if (page) {
+      page.classList.add('active');
+      initPageCharts(item.dataset.page);
+    }
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+const chartsInitialized = {};
+
+function initPageCharts(page) {
+  if (chartsInitialized[page]) return;
+  chartsInitialized[page] = true;
+  if (page === 'live-inspection') {
+    buildPassRateTrendChart();
+  } else if (page === 'defect-library') {
+    buildDefectRateTrendChart();
+    buildDefectCatalogChart();
+    buildNcrTrendChart();
+  } else if (page === 'line-analytics') {
+    buildPassRateByLineChart();
+    buildLineDowntimeChart();
+  } else if (page === 'model-intelligence') {
+    buildFeatureImportanceChart();
+    buildLatencyPercentilesChart();
+  } else if (page === 'executive-cockpit') {
+    buildExecPlantChart();
+    buildExecShiftChart();
+    buildExecDonutChart();
+    buildExecDelayChart();
+    buildExecForecastChart();
+  }
+}
+
+// Build all charts for initial page
+document.addEventListener('DOMContentLoaded', () => {
+  buildDefectTable();
+  buildNcrTable();
+  buildLinePerformanceTable();
+  buildPassRateTrendChart();
+  chartsInitialized['live-inspection'] = true;
+  setupTooltips();
+  setupFilters();
+  // Simulate live feed
+  setInterval(addLiveDefect, 8000);
+});
+
+// ============================================================
+// DEFECT TABLE
+// ============================================================
+function buildDefectTable() {
+  const tbody = document.getElementById('defectTableBody');
+  tbody.innerHTML = defectData.map(d => `
+    <tr>
+      <td>${d.time}</td>
+      <td><strong>${d.type}</strong></td>
+      <td style="color:#94a3b8">${d.id}</td>
+      <td>${d.plant}</td>
+      <td>${d.line}</td>
+      <td>${getConfBadge(d.conf)}</td>
+      <td>${d.camera}</td>
+      <td>${getStatusBadge(d.status)}</td>
+      <td>${d.shift}</td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="action-btn btn-assign" onclick="openModal('Assign Defect','Assign ${d.id} to a quality engineer for review.')">👤 Assign</button>
+          <button class="action-btn btn-escalate" onclick="openModal('Escalate Defect','Escalate ${d.id} to management. This will trigger an immediate review.')">🚫 Escalate</button>
+          <button class="action-btn btn-ncr" onclick="openModal('Create NCR','Create a Non-Conformance Report for ${d.id}.')">📋 NCR</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function getStatusBadge(status) {
+  const map = { 'PASS':'badge-pass','HALT':'badge-halt','REJECT':'badge-reject' };
+  return `<span class="status-badge ${map[status]||'badge-halt'}">${status}</span>`;
+}
+
+function getConfBadge(conf) {
+  let cls = conf >= 90 ? 'conf-high' : conf >= 80 ? 'conf-med' : 'conf-low-val';
+  return `<span class="conf-badge ${cls}">${conf}%</span>`;
+}
+
+let defectCounter = 8516;
+function addLiveDefect() {
+  defectCounter++;
+  const types = ['Porosity','Weld Flaw','Edge Chip','Surface Crack','Foreign Object','Coating Defect','Assembly Alignment'];
+  const plants = ['Shanghai, China','Pune, India','Bangalore, India'];
+  const lines = ['Line 1','Line 2','Line 3','Line 4','Line 5','Line 6'];
+  const cams = ['CAM-01A','CAM-02A','CAM-03B','CAM-04A','CAM-05B','CAM-06C'];
+  const statuses = ['PASS','HALT','REJECT'];
+  const shifts = ['Shift A','Shift B','Shift C'];
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const newDefect = {
+    time: timeStr,
+    type: types[Math.floor(Math.random()*types.length)],
+    id: `DEF-${defectCounter}`,
+    plant: plants[Math.floor(Math.random()*plants.length)],
+    line: lines[Math.floor(Math.random()*lines.length)],
+    conf: +(70 + Math.random()*28).toFixed(1),
+    camera: cams[Math.floor(Math.random()*cams.length)],
+    status: statuses[Math.floor(Math.random()*statuses.length)],
+    shift: shifts[Math.floor(Math.random()*shifts.length)]
+  };
+  defectData.unshift(newDefect);
+  if (defectData.length > 20) defectData.pop();
+  buildDefectTable();
+  // Update record count
+  const rc = document.querySelector('.record-count');
+  if (rc) {
+    const cur = parseInt(rc.textContent) || 42;
+    rc.textContent = (cur + 1) + ' Records';
+  }
+}
+
+// ============================================================
+// NCR TABLE
+// ============================================================
+function buildNcrTable() {
+  const tbody = document.getElementById('ncrTableBody');
+  tbody.innerHTML = ncrData.map(d => `
+    <tr>
+      <td style="color:#94a3b8">${d.id}</td>
+      <td><strong>${d.type}</strong></td>
+      <td>${d.product}</td>
+      <td>${d.plant}</td>
+      <td>${d.line}</td>
+      <td>${d.date}</td>
+      <td>${getNcrStatusBadge(d.status)}</td>
+      <td>${getSeverityText(d.severity)}</td>
+      <td>${d.ncrId}</td>
+      <td>${getResolutionTime(d.resolution)}</td>
+    </tr>
+  `).join('');
+}
+
+function getNcrStatusBadge(s) {
+  const map = { 'Escalated':'badge-escalated','Open':'badge-open','In Review':'badge-in-review','Closed':'badge-closed' };
+  return `<span class="status-badge ${map[s]||'badge-open'}">${s}</span>`;
+}
+function getSeverityText(s) {
+  const map = { 'High':'red','Medium':'orange','Low':'green' };
+  return `<span style="font-weight:700;color:var(--${map[s]||'text-primary'})">${s}</span>`;
+}
+function getResolutionTime(r) {
+  if (r === 'N/A') return `<span style="color:#94a3b8">N/A</span>`;
+  return `<span style="color:var(--green);font-weight:700">${r}</span>`;
+}
+
+// ============================================================
+// LINE PERFORMANCE TABLE
+// ============================================================
+function buildLinePerformanceTable() {
+  const tbody = document.getElementById('linePerformanceBody');
+  tbody.innerHTML = linePerformanceData.map(d => {
+    const statusMap = { 'Good':'badge-good','Warning':'badge-warning','Critical':'badge-critical' };
+    const vsColor = d.vsTarget.startsWith('+') ? 'green' : 'red';
+    return `
+      <tr>
+        <td><strong>${d.line}</strong></td>
+        <td><strong>${d.passRate}%</strong></td>
+        <td>${d.inspections.toLocaleString()}</td>
+        <td style="color:var(--red);font-weight:700">${d.defects}</td>
+        <td><span class="status-badge ${statusMap[d.status]}">${d.status}</span></td>
+        <td style="color:var(--${vsColor});font-weight:700">${d.vsTarget}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// CHART: Pass Rate Trend
+// ============================================================
+function buildPassRateTrendChart() {
+  const ctx = document.getElementById('passRateTrendChart');
+  if (!ctx) return;
+  const labels = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00'];
+  const data = [97.2, 97.8, 97.5, 97.7, 98.1, 98.4, 98.3, 97.9, 97.6, 97.9];
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pass Rate',
+        data,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.08)',
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#10b981',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },{
+        label: 'Target 97%',
+        data: labels.map(() => 97),
+        borderColor: '#cbd5e1',
+        borderWidth: 1.5,
+        borderDash: [5, 4],
+        pointRadius: 0,
+        fill: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'white',
+          titleColor: '#0f172a',
+          bodyColor: '#10b981',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { size: 13, weight: '700' },
+          bodyFont: { size: 13, weight: '700' },
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => ctx.datasetIndex === 0 ? `Pass Rate : ${ctx.parsed.y}%` : null,
+            filter: item => item.datasetIndex === 0
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#94a3b8' },
+          border: { display: false }
+        },
+        y: {
+          min: 95,
+          max: 100,
+          ticks: {
+            font: { size: 11 }, color: '#94a3b8',
+            callback: v => v + '%'
+          },
+          grid: { color: '#f1f5f9', drawBorder: false },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// CHART: Defect Rate Trend (combo)
+// ============================================================
+let defectTrendChart = null;
+
+const defectTrendData = {
+  Hourly: {
+    labels: ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00'],
+    bars:   [600, 750, 900, 820, 1050, 1020, 800, 960, 880, 1180],
+    line:   [18, 25, 28, 26, 31, 29, 17, 33, 27, 34]
+  },
+  Daily: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    bars:   [4200, 3800, 4500, 4100, 4800, 3200, 3600],
+    line:   [42, 38, 46, 41, 48, 32, 36]
+  },
+  Weekly: {
+    labels: ['W1','W2','W3','W4','W5','W6'],
+    bars:   [29000, 27000, 31000, 28000, 33000, 30000],
+    line:   [210, 195, 230, 205, 245, 220]
+  }
+};
+
+function buildDefectRateTrendChart() {
+  const ctx = document.getElementById('defectRateTrendChart');
+  if (!ctx) return;
+  const d = defectTrendData.Hourly;
+
+  defectTrendChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: d.labels,
+      datasets: [
+        {
+          label: 'Parts Inspected',
+          data: d.bars,
+          backgroundColor: 'rgba(99,140,230,0.75)',
+          borderRadius: 4,
+          yAxisID: 'y',
+          order: 2
+        },
+        {
+          label: 'Defects Found',
+          data: d.line,
+          type: 'line',
+          borderColor: '#ef4444',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          tension: 0.4,
+          pointBackgroundColor: '#ef4444',
+          pointRadius: 4,
+          yAxisID: 'y1',
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: { font: { size: 11 }, usePointStyle: true, boxWidth: 12 }
+        },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94a3b8' }, border: { display: false } },
+        y: {
+          position: 'left',
+          ticks: { font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y1: {
+          position: 'right',
+          ticks: { font: { size: 11 }, color: '#94a3b8' },
+          grid: { drawOnChartArea: false },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function updateDefectTrendChart() {
+  const period = document.getElementById('defectTrendPeriod').value;
+  const d = defectTrendData[period];
+  if (!defectTrendChart || !d) return;
+  defectTrendChart.data.labels = d.labels;
+  defectTrendChart.data.datasets[0].data = d.bars;
+  defectTrendChart.data.datasets[1].data = d.line;
+  defectTrendChart.update();
+}
+
+// ============================================================
+// CHART: Defect Catalog (horizontal bar)
+// ============================================================
+let defectCatalogChart = null;
+let activeDefectFilter = null;
+
+function buildDefectCatalogChart() {
+  const ctx = document.getElementById('defectCatalogChart');
+  if (!ctx) return;
+  const labels   = ['Surface Crack','Scratch','Foreign Object','Edge Chip','Dimensional Variance','Coating Defect','Weld Flaw','Porosity'];
+  const values   = [142, 121, 98, 88, 76, 54, 42, 28];
+  const colors   = ['#ef4444','#10b981','#ef4444','#f59e0b','#f59e0b','#10b981','#ef4444','#f59e0b'];
+
+  defectCatalogChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors, borderRadius: 4, barThickness: 14 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.parsed.x} defects` }
+        }
+      },
+      scales: {
+        x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#94a3b8' }, border: { display: false } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#0f172a' }, border: { display: false } }
+      },
+      onClick(evt, elements) {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        const label = labels[idx];
+        filterNcrByType(label);
+        showToast(`Filtering NCR table by: ${label}`);
+      }
+    }
+  });
+}
+
+function filterNcrByType(type) {
+  activeDefectFilter = activeDefectFilter === type ? null : type;
+  const filtered = activeDefectFilter ? ncrData.filter(d => d.type === activeDefectFilter) : ncrData;
+  const tbody = document.getElementById('ncrTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = filtered.map(d => `
+    <tr>
+      <td style="color:#94a3b8">${d.id}</td>
+      <td><strong>${d.type}</strong></td>
+      <td>${d.product}</td>
+      <td>${d.plant}</td>
+      <td>${d.line}</td>
+      <td>${d.date}</td>
+      <td>${getNcrStatusBadge(d.status)}</td>
+      <td>${getSeverityText(d.severity)}</td>
+      <td>${d.ncrId}</td>
+      <td>${getResolutionTime(d.resolution)}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:20px;">No records match filter</td></tr>`;
+}
+
+// ============================================================
+// CHART: NCR Trend
+// ============================================================
+function buildNcrTrendChart() {
+  const ctx = document.getElementById('ncrTrendChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['W1','W2','W3','W4','W5','W6'],
+      datasets: [{
+        data: [38, 32, 28, 22, 18, 14],
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+        barThickness: 28
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94a3b8' }, border: { display: false } },
+        y: {
+          max: 60,
+          ticks: { stepSize: 30, font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// CHART: Pass Rate By Line
+// ============================================================
+function buildPassRateByLineChart() {
+  const ctx = document.getElementById('passRateByLineChart');
+  if (!ctx) return;
+  const data = [98.2, 97.5, 97.1, 96.8, 95.4, 93.2];
+  const colors = data.map(v => v >= 97 ? '#10b981' : v >= 95 ? '#f59e0b' : '#ef4444');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Line 1','Line 2','Line 6','Line 4','Line 5','Line 3'],
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 4,
+        barThickness: 40
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}%` } },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#0f172a' }, border: { display: false } },
+        y: {
+          min: 88, max: 100,
+          ticks: { callback: v => v+'%', font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'topLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, data } = chart;
+        c.save();
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          c.fillStyle = '#0f172a';
+          c.font = '700 12px system-ui';
+          c.textAlign = 'center';
+          c.fillText(data.datasets[0].data[i] + '%', bar.x, bar.y - 6);
+        });
+        c.restore();
+      }
+    }]
+  });
+}
+
+// ============================================================
+// CHART: Line Downtime
+// ============================================================
+function buildLineDowntimeChart() {
+  const ctx = document.getElementById('lineDowntimeChart');
+  if (!ctx) return;
+  const values = [0.8, 1.4, 4.2, 1.1, 2.8, 0.9];
+  const colors = values.map(v => v >= 3 ? '#ef4444' : v >= 2 ? '#f59e0b' : '#10b981');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Line 1','Line 2','Line 3','Line 4','Line 5','Line 6'],
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 4,
+        barThickness: 18
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}h` } }
+      },
+      scales: {
+        x: {
+          min: 0, max: 8,
+          ticks: { callback: v => v+'h', font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 12 }, color: '#0f172a' },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'rightLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, data } = chart;
+        c.save();
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          c.fillStyle = '#0f172a';
+          c.font = '600 12px system-ui';
+          c.textAlign = 'left';
+          c.fillText(data.datasets[0].data[i] + 'h', bar.x + 6, bar.y + 4);
+        });
+        c.restore();
+      }
+    }]
+  });
+}
+
+// ============================================================
+// CHART: Feature Importance
+// ============================================================
+function buildFeatureImportanceChart() {
+  const ctx = document.getElementById('featureImportanceChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Vibration RMS','Thermal Delta','Pressure Variance','Run Hours','Ambient Temp','Load Factor'],
+      datasets: [{
+        data: [34, 24, 17, 12, 8, 5],
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+        barThickness: 16
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}%` } }
+      },
+      scales: {
+        x: {
+          ticks: { callback: v => v+'%', font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 12 }, color: '#0f172a' },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'rightPct',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, data } = chart;
+        c.save();
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          c.fillStyle = '#0f172a';
+          c.font = '600 12px system-ui';
+          c.textAlign = 'left';
+          c.fillText(data.datasets[0].data[i] + '%', bar.x + 6, bar.y + 4);
+        });
+        c.restore();
+      }
+    }]
+  });
+}
+
+// ============================================================
+// CHART: Latency Percentiles
+// ============================================================
+function buildLatencyPercentilesChart() {
+  const ctx = document.getElementById('latencyPercentilesChart');
+  if (!ctx) return;
+  const vals = [6.2, 7.1, 7.8, 8.0, 8.5];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['P50','P75','P90','P95','P99'],
+      datasets: [{
+        data: vals,
+        backgroundColor: '#8b5cf6',
+        borderRadius: 4,
+        barThickness: 36
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} ms` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#0f172a' }, border: { display: false } },
+        y: {
+          min: 0, max: 12,
+          ticks: { callback: v => v+' ms', font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'topMs',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, data } = chart;
+        c.save();
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          c.fillStyle = '#0f172a';
+          c.font = '600 11px system-ui';
+          c.textAlign = 'center';
+          c.fillText(data.datasets[0].data[i] + ' ms', bar.x, bar.y - 7);
+        });
+        c.restore();
+      }
+    }]
+  });
+}
+
+// ============================================================
+// TOOLTIPS
+// ============================================================
+function setupTooltips() {
+  const tooltip = document.getElementById('tooltip');
+
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-tooltip]');
+    if (!el) return;
+    tooltip.textContent = el.dataset.tooltip;
+    tooltip.classList.add('visible');
+  });
+
+  document.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY - 30) + 'px';
+  });
+
+  document.addEventListener('mouseout', e => {
+    if (!e.target.closest('[data-tooltip]')) return;
+    tooltip.classList.remove('visible');
+  });
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+// ============================================================
+// HEADER BUTTONS
+// ============================================================
+function exportNCRs() {
+  showToast('Exporting NCRs to CSV...');
+  setTimeout(() => {
+    const rows = [['Defect ID','Type','Product','Plant','Line','Date','Status','Severity','NCR ID','Resolution Time']];
+    ncrData.forEach(d => rows.push([d.id,d.type,d.product,d.plant,d.line,d.date,d.status,d.severity,d.ncrId,d.resolution]));
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'NCR_Export.csv';
+    a.click();
+  }, 500);
+}
+
+function syncMES() {
+  showToast('Syncing with MES system...');
+  const btn = document.querySelector('.btn-sync');
+  if (btn) {
+    btn.textContent = '⟳ Syncing...';
+    setTimeout(() => { btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Sync MES'; showToast('MES sync complete ✓'); }, 2000);
+  }
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function setupFilters() {
+  // Attach live filtering to defect table filters
+  ['filter-plant-li','filter-shift-li','filter-line-li','filter-date-li'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', applyDefectFilters);
+  });
+}
+
+function applyDefectFilters() {
+  const plant = document.getElementById('filter-plant-li')?.value || 'All Plants';
+  const shift = document.getElementById('filter-shift-li')?.value || 'All Shifts';
+  const line  = document.getElementById('filter-line-li')?.value  || 'All Lines';
+
+  const filtered = defectData.filter(d => {
+    return (plant === 'All Plants' || d.plant === plant) &&
+           (shift === 'All Shifts' || d.shift === shift) &&
+           (line  === 'All Lines'  || d.line  === line);
+  });
+
+  const tbody = document.getElementById('defectTableBody');
+  if (!tbody) return;
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:20px;">No records match the selected filters</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(d => `
+    <tr>
+      <td>${d.time}</td>
+      <td><strong>${d.type}</strong></td>
+      <td style="color:#94a3b8">${d.id}</td>
+      <td>${d.plant}</td>
+      <td>${d.line}</td>
+      <td>${getConfBadge(d.conf)}</td>
+      <td>${d.camera}</td>
+      <td>${getStatusBadge(d.status)}</td>
+      <td>${d.shift}</td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="action-btn btn-assign" onclick="openModal('Assign Defect','Assign ${d.id} to a quality engineer.')">👤 Assign</button>
+          <button class="action-btn btn-escalate" onclick="openModal('Escalate Defect','Escalate ${d.id} to management.')">🚫 Escalate</button>
+          <button class="action-btn btn-ncr" onclick="openModal('Create NCR','Create NCR for ${d.id}.')">📋 NCR</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// TABLE SORTING
+// ============================================================
+document.addEventListener('click', e => {
+  const th = e.target.closest('th');
+  if (!th) return;
+  const table = th.closest('table');
+  if (!table) return;
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  const idx = Array.from(th.parentNode.children).indexOf(th);
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const dir = th.dataset.sort === 'asc' ? -1 : 1;
+  th.parentNode.querySelectorAll('th').forEach(h => delete h.dataset.sort);
+  th.dataset.sort = dir === 1 ? 'asc' : 'desc';
+  rows.sort((a, b) => {
+    const av = a.cells[idx]?.textContent.trim() || '';
+    const bv = b.cells[idx]?.textContent.trim() || '';
+    return av.localeCompare(bv, undefined, { numeric: true }) * dir;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+});
+
+// ============================================================
+// QUALITY VISION AI — Chat Engine
+// ============================================================
+
+const qvaiResponses = {
+  'What Are The Top Defects In Shift B?': `📊 **Top Defects in Shift B (Today)**\n\n1. Surface Crack — 48 occurrences (34.3%)\n2. Edge Chip — 31 occurrences (22.1%)\n3. Weld Flaw — 24 occurrences (17.1%)\n4. Foreign Object — 18 occurrences (12.9%)\n5. Porosity — 11 occurrences (7.9%)\n\n🔴 Shift B has a 12% higher defect rate than Shift A. Recommend reviewing operator handover protocols and machine warm-up times at shift changeover.`,
+
+  'Which Plant Has The Highest Reject Rate?': `🏭 **Plant Reject Rate Analysis**\n\n🔴 Shanghai, China — 4.9% reject rate (Highest)\n• 177 defects detected\n• 3,760 parts inspected\n• Pass rate: 95.1% — Critical status\n\n⚠️ Pune, India — 3.5% reject rate (Warning)\n• 135 defects detected\n• Pass rate: 96.5%\n\n✅ Bangalore, India — 2.4% reject rate (Best)\n• 103 defects, 97.6% pass rate\n\n💡 Recommend escalating Shanghai plant to Quality Director level. Line 3 tooling inspection is overdue by 14 days.`,
+
+  'Why Did False Positives Increase?': `🤖 **False Positive Rate Analysis**\n\nFalse Positives (FP) increased from 6 to 11 this week (+83%).\n\n**Root Causes Identified:**\n1. 🌡️ Ambient lighting change in Zone B — camera calibration drift detected\n2. 🔧 Porosity classifier threshold set too sensitive (3.4% FPR vs 1.5% target)\n3. 📦 New material batch from Supplier C has surface texture variation within spec but being flagged\n\n**Recommended Actions:**\n• Recalibrate CAM-03B and CAM-06C lighting baseline\n• Retrain Porosity class with 200+ additional confirmed negative samples\n• Update Supplier C material profile in model training data`,
+
+  'Show Worst Performing Line Today': `📉 **Worst Performing Line: Line 3**\n\n• Pass Rate: 93.2% (3.8pp below 97% target)\n• Defects: 119 (highest of all lines)\n• Downtime: 4.2h (critical threshold exceeded)\n• Camera: CAM-03B — functioning normally\n• Plant: Shanghai, China\n\n🚨 **Active Alerts:**\n• Surface Crack rate is 2.4× plant average\n• Vibration RMS elevated 34% above threshold\n• 3 consecutive shifts with rising defect trend\n\n⚡ **Recommended Actions:**\n1. Inspect Station 7 tooling immediately\n2. Schedule Vibration RMS sensor calibration\n3. Reduce line speed by 15% until tooling replaced`,
+
+  'What Is Model Accuracy Trend?': `📈 **AI Model Accuracy Trend (Last 7 Days)**\n\n• Precision: 96.1% ✅ (stable, ±0.2%)\n• Recall: 95.4% ✅ (stable, ±0.3%)\n• Inference Latency: 8.0ms ✅ (well under 10ms SLA)\n\n⚠️ **Attention Required:**\n• Porosity class detection dropped from 94.1% → 91.2% this week\n• False Positive Rate on Porosity rose to 3.4% (target < 2%)\n\n💡 **AI Recommendation:**\n• Queue retraining job with 500 new Porosity samples from the last 30 days\n• Estimated retraining time: 4 hours\n• Expected recall improvement: +2.5pp to ~93.7%`
+};
+
+const genericResponses = [
+  "Based on current data, your overall quality system is performing well with a 97.8% pass rate. The main area of concern is Line 3 in Shanghai, which is operating 3.8pp below the 97% target. I recommend prioritising a tooling inspection on that line.",
+  "Looking at the live KPIs, defect rate has been trending upward over the last 2 hours on Line 2. This correlates with Shift B commencement at 14:00. Consider reviewing operator handover documentation and machine settings at shift change.",
+  "Model performance is stable overall, but the Porosity class is showing reduced detection accuracy this week (91.2% vs 94% baseline). This is likely due to a new material batch from Supplier C with atypical surface texture. Retraining with recent samples is recommended.",
+  "The AI Quality Forecast predicts defect risk will peak between 16:00–18:00 on Lines 2 and 3. Pre-emptive load adjustment — reducing throughput speed by 10–15% on those lines — could avoid an estimated $18,400 in quality loss costs."
+];
+
+function getQVAITimestamp() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const initEl = document.getElementById('qvaiInitTime');
+  if (initEl) initEl.textContent = getQVAITimestamp();
+});
+
+function sendQVAIMessage() {
+  const input = document.getElementById('qvaiInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendUserMessage(text);
+  showTypingIndicator();
+  setTimeout(() => {
+    removeTypingIndicator();
+    const resp = qvaiResponses[text] ||
+      genericResponses[Math.floor(Math.random() * genericResponses.length)];
+    appendBotMessage(resp);
+  }, 1200 + Math.random() * 800);
+}
+
+function sendSuggestedQuery(query) {
+  const input = document.getElementById('qvaiInput');
+  if (input) { input.value = query; sendQVAIMessage(); }
+}
+
+function appendUserMessage(text) {
+  const container = document.getElementById('qvaiMessages');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'qvai-msg-row qvai-msg-user';
+  row.innerHTML = `
+    <div>
+      <div class="qvai-bubble qvai-bubble-user">${escapeHtml(text)}</div>
+      <div class="qvai-timestamp">${getQVAITimestamp()}</div>
+    </div>`;
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendBotMessage(text) {
+  const container = document.getElementById('qvaiMessages');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'qvai-msg-row qvai-msg-bot';
+  // Format markdown-like text
+  const formatted = text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  row.innerHTML = `
+    <div class="qvai-bot-avatar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </div>
+    <div>
+      <div class="qvai-bubble qvai-bubble-bot">${formatted}</div>
+      <div class="qvai-timestamp">${getQVAITimestamp()}</div>
+    </div>`;
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTypingIndicator() {
+  const container = document.getElementById('qvaiMessages');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'qvai-msg-row qvai-msg-bot';
+  row.id = 'qvaiTyping';
+  row.innerHTML = `
+    <div class="qvai-bot-avatar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </div>
+    <div class="qvai-typing"><span></span><span></span><span></span></div>`;
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('qvaiTyping');
+  if (el) el.remove();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// EXECUTIVE COCKPIT CHARTS
+// ============================================================
+function buildExecPlantChart() {
+  const ctx = document.getElementById('execPlantChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Bangalore', 'Pune', 'Shanghai'],
+      datasets: [
+        {
+          label: 'Pass Rate %',
+          data: [97.6, 96.5, 95.1],
+          backgroundColor: '#1e293b',
+          borderRadius: 4,
+          yAxisID: 'y',
+          order: 1
+        },
+        {
+          label: 'Critical Defects',
+          data: [22, 29, 43],
+          backgroundColor: '#ef4444',
+          borderRadius: 4,
+          yAxisID: 'y1',
+          order: 1
+        },
+        {
+          label: 'Open NCRs',
+          data: [8, 12, 18],
+          backgroundColor: '#f59e0b',
+          borderRadius: 4,
+          yAxisID: 'y1',
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, usePointStyle: true, boxWidth: 10, padding: 14 }
+        },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#0f172a' }, border: { display: false } },
+        y: {
+          position: 'left',
+          min: 80, max: 100,
+          ticks: { callback: v => v+'%', font: { size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y1: {
+          position: 'right',
+          min: 0, max: 60,
+          ticks: { font: { size: 11 }, color: '#94a3b8' },
+          grid: { drawOnChartArea: false },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildExecShiftChart() {
+  const ctx = document.getElementById('execShiftChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Morning', 'Afternoon', 'Night'],
+      datasets: [
+        {
+          label: 'Defect Rate %',
+          data: [2.7, 3.6, 2.2],
+          backgroundColor: '#1e293b',
+          borderRadius: 4,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Critical Defects',
+          data: [8, 15, 6],
+          backgroundColor: '#f59e0b',
+          borderRadius: 4,
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, usePointStyle: true, boxWidth: 10, padding: 14 }
+        },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#0f172a' }, border: { display: false } },
+        y: {
+          position: 'left',
+          min: 0, max: 3.6,
+          ticks: { callback: v => v+'%', font: { size: 11 }, color: '#94a3b8', stepSize: 0.9 },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y1: {
+          position: 'right',
+          min: 0, max: 16,
+          ticks: { font: { size: 11 }, color: '#94a3b8', stepSize: 4 },
+          grid: { drawOnChartArea: false },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// Donut chart with interactive legend
+const donutItems = [
+  { label: 'Surface Crack',      count: 1245, pct: '19.8%', color: '#3b82f6' },
+  { label: 'Scratch',            count: 1105, pct: '17.6%', color: '#f59e0b' },
+  { label: 'Foreign Object',     count:  982, pct: '15.6%', color: '#ef4444' },
+  { label: 'Edge Chip',          count:  854, pct: '13.6%', color: '#8b5cf6' },
+  { label: 'Dim. Variance',      count:  731, pct: '11.6%', color: '#10b981' },
+  { label: 'Coating Defect',     count:  620, pct:  '9.9%', color: '#f97316' },
+  { label: 'Weld Flaw',          count:  415, pct:  '6.6%', color: '#06b6d4' },
+  { label: 'Porosity',           count:  328, pct:  '5.2%', color: '#6366f1' },
+];
+let donutChart = null;
+let hiddenDonutItems = new Set();
+
+function buildExecDonutChart() {
+  const ctx = document.getElementById('execDonutChart');
+  if (!ctx) return;
+
+  // Build legend
+  const legendEl = document.getElementById('execDonutLegend');
+  if (legendEl) {
+    legendEl.innerHTML = donutItems.map((item, i) => `
+      <div class="defect-legend-item" id="donut-legend-${i}" onclick="toggleDonutItem(${i})">
+        <div class="defect-legend-dot" style="background:${item.color}"></div>
+        <span class="defect-legend-name">${item.label}</span>
+        <span class="defect-legend-count">${item.count.toLocaleString()}</span>
+        <span class="defect-legend-pct">${item.pct}</span>
+      </div>`).join('');
+  }
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: donutItems.map(d => d.label),
+      datasets: [{
+        data: donutItems.map(d => d.count),
+        backgroundColor: donutItems.map(d => d.color),
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${donutItems[ctx.dataIndex].pct})`
+          }
+        }
+      },
+      onClick(evt, elements) {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        updateDonutCenter(idx);
+      }
+    },
+    plugins: [{
+      id: 'donutCenter',
+      afterDraw(chart) {
+        const { ctx: c, chartArea: { left, top, right, bottom } } = chart;
+        const cx = (left + right) / 2;
+        const cy = (top + bottom) / 2;
+        c.save();
+        c.textAlign = 'center';
+        c.fillStyle = '#0f172a';
+        c.font = '700 13px system-ui';
+        c.fillText(chart._centerLabel || 'Surface Crack', cx, cy - 6);
+        c.fillStyle = '#64748b';
+        c.font = '500 11px system-ui';
+        c.fillText(chart._centerSub || '1,245 (19.8%)', cx, cy + 12);
+        c.restore();
+      }
+    }]
+  });
+  donutChart._centerLabel = 'Surface Crack';
+  donutChart._centerSub = '1,245 (19.8%)';
+}
+
+function updateDonutCenter(idx) {
+  if (!donutChart) return;
+  const item = donutItems[idx];
+  donutChart._centerLabel = item.label;
+  donutChart._centerSub = `${item.count.toLocaleString()} (${item.pct})`;
+  donutChart.update();
+}
+
+function toggleDonutItem(idx) {
+  if (!donutChart) return;
+  const legendItem = document.getElementById(`donut-legend-${idx}`);
+  if (hiddenDonutItems.has(idx)) {
+    hiddenDonutItems.delete(idx);
+    donutChart.show(0, idx);
+    if (legendItem) legendItem.classList.remove('hidden-item');
+  } else {
+    hiddenDonutItems.add(idx);
+    donutChart.hide(0, idx);
+    if (legendItem) legendItem.classList.add('hidden-item');
+  }
+}
+
+function buildExecDelayChart() {
+  const ctx = document.getElementById('execDelayChart');
+  if (!ctx) return;
+
+  // Generate 29 days of stacked data
+  const days = Array.from({length: 29}, (_, i) => `D${String(i+1).padStart(2,'0')}`);
+  const seed = (i, base, amp) => base + amp * Math.sin(i * 0.4) + Math.random() * 2;
+
+  const inspection = days.map((_, i) => +(seed(i, 5, 1.5)).toFixed(1));
+  const rework     = days.map((_, i) => +(seed(i, 5, 2.0)).toFixed(1));
+  const lineHalts  = days.map((_, i) => +(seed(i, 4, 1.0)).toFixed(1));
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [
+        {
+          label: 'Inspection Delays',
+          data: inspection,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.15)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 1.5,
+          pointRadius: 0,
+        },
+        {
+          label: 'Rework Time',
+          data: rework,
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.12)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 1.5,
+          pointRadius: 0,
+        },
+        {
+          label: 'Line Halts',
+          data: lineHalts,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.12)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 1.5,
+          pointRadius: 0,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, usePointStyle: true, boxWidth: 8, padding: 12 }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 10 }, color: '#94a3b8',
+            maxTicksLimit: 8,
+            callback(v, i) { return [0,7,14,21,28].includes(i) ? this.getLabelForValue(v) : ''; }
+          },
+          border: { display: false }
+        },
+        y: {
+          min: 0, max: 20,
+          ticks: { font: { size: 11 }, color: '#94a3b8', stepSize: 5 },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildExecForecastChart() {
+  const ctx = document.getElementById('execForecastChart');
+  if (!ctx) return;
+
+  const hoursActual    = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00'];
+  const hoursAll       = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'];
+  const actualDefect   = [2.1, 1.9, 2.2, 2.6, 3.0, 3.4, 3.8, 3.1, null, null, null, null];
+  const predictedDefect= [2.1, 1.9, 2.2, 2.6, 3.1, 3.5, 3.9, 3.2, 4.7, 4.6, 4.0, 3.7];
+  const qualityLoss    = [1.3, 1.1, 1.4, 1.8, 2.2, 3.8, 3.5, 3.1, 4.4, 6.2, 4.8, 2.8];
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: hoursAll,
+      datasets: [
+        {
+          label: 'Actual Defect Rate',
+          data: actualDefect,
+          borderColor: '#3b82f6',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5,
+          tension: 0.4,
+          pointBackgroundColor: '#3b82f6',
+          pointRadius: 4,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Predicted Defect Rate',
+          data: predictedDefect,
+          borderColor: '#8b5cf6',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [6, 3],
+          tension: 0.4,
+          pointBackgroundColor: '#8b5cf6',
+          pointRadius: 4,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Quality Loss ($k)',
+          data: qualityLoss,
+          borderColor: '#f97316',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5,
+          tension: 0.4,
+          pointBackgroundColor: '#f97316',
+          pointRadius: 4,
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, usePointStyle: true, boxWidth: 8, padding: 14 }
+        },
+        tooltip: { mode: 'index', intersect: false },
+        annotation: {}
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#94a3b8' },
+          border: { display: false }
+        },
+        y: {
+          position: 'left',
+          min: 0, max: 8,
+          ticks: { callback: v => v+'%', font: { size: 11 }, color: '#94a3b8', stepSize: 2 },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        },
+        y1: {
+          position: 'right',
+          min: 0, max: 8,
+          ticks: { callback: v => v+'k', font: { size: 11 }, color: '#f97316', stepSize: 2 },
+          grid: { drawOnChartArea: false },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'highRiskLine',
+      afterDraw(chart) {
+        const { ctx: c, chartArea, scales } = chart;
+        const xVal = scales.x.getPixelForValue(8); // 16:00 index
+        if (xVal < chartArea.left || xVal > chartArea.right) return;
+        c.save();
+        c.setLineDash([6, 4]);
+        c.strokeStyle = '#f59e0b';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(xVal, chartArea.top);
+        c.lineTo(xVal, chartArea.bottom);
+        c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = '#f59e0b';
+        c.font = '700 11px system-ui';
+        c.textAlign = 'center';
+        c.fillText('High Risk Window', xVal, chartArea.top - 6);
+        // Right-side labels for y1
+        const labels = [['5k', 0.68], ['2k', 0.85], ['0k', 1.0]];
+        labels.forEach(([txt, pct]) => {
+          const y = chartArea.top + (chartArea.bottom - chartArea.top) * pct;
+          c.fillStyle = '#f97316';
+          c.font = '600 10px system-ui';
+          c.textAlign = 'right';
+          c.fillText(txt, chartArea.right + 28, y);
+        });
+        c.restore();
+      }
+    }]
+  });
+}
+
+// ============================================================
+// executive-cockpit added to initPageCharts above — handled in main block
+// ============================================================
+
+</script>
+</body>
+</html>
