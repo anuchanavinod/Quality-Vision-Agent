@@ -1,0 +1,56 @@
+Tables
+Customer(Customer_ID, Name, City)
+Product(Product_ID, Category)
+Sales(Customer_ID, Product_ID, Sale_Date, Amount)u
+ 
+Find customers who purchased in Jan but not Feb.
+ 
+ 
+Source row count = 1,000,000
+Target row count = 998,500
+ 
+How would you investigate?
+ 
+ 
+ 
+Table Sales
+(Customer_ID, Amount)
+ 
+Find the top 2 customers by total sales.
+ 
+nums = [1,2,3,2,4,1]
+ 
+return duplicates as a list
+ 
+ 
+data = [
+('A',100),
+('B',200),
+('A',150),
+('B',100)
+]
+ 
+Find total sales per customer.
+
+
+
+One SQL query to find duplicate?
+ 
+Windows function rank() and dense-rank()
+ 
+Aggregate function 
+ 
+Over()
+ 
+And power bi - kind of function 
+ 
+Sumx, all, bookmark 
+ 
+Filter 
+ 
+Power bi service 
+ 
+And 9-10 scenario base question  - power bi
+ 
+Related  to deployment and kpi number, report access 
+ 
