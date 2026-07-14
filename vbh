@@ -1,0 +1,30 @@
+ 
+Sl No	Questions	Answers
+1	Can you walk me through your profile?	
+ 
+
+2	Explain about recent Power BI project?	
+ 
+
+3	What was your data set size?	My dataset consisted of over one million records, which required careful extraction, cleaning, and optimization to maintain dashboard performance.
+4	Which mode did you use to connect your data?	I used Import Mode, which loads data into Power BI's in-memory engine, ensuring high performance and responsiveness for my reports.
+5	Are you familiar with DAX? What functions did you use?	Yes, I use DAX for calculated measures and KPIs. I primarily use time intelligence functions like MoM and YoY comparisons to analyze trends.
+6	Name two aggregation functions.	I use SUMX for row-level dynamic calculations and AVERAGE to calculate the mean value of columns in my reports.
+7	Scenarios for SUM and SUMX?	I use SUM for simple column totals and SUMX when I need to perform a calculation on each row (e.g., Qty × Price) before aggregating.
+8	Write a DAX query using SUMX.	Total Sales = SUMX(Sales, Sales[Quantity] * Sales[UnitPrice]). It iterates through the table to calculate totals row-by-row before summing.
+9	Question on calculated columns?	Yes, I use calculated columns for KPI segmentation and date-based classification when the field is not present in the source data.
+10	Scenario for implementing RLS?	I implemented RLS when different business units needed to see only their region-specific data, ensuring privacy and tailored insights.
+11	How did you implement RLS?	I defined roles in the Modeling tab, wrote DAX filters for specific columns, and then assigned users/groups to those roles in the Power BI Service.
+12	Where do you provide access for RLS?	I assign users or security groups to the specific roles within the Dataset Security Settings in the Power BI Service after publishing.
+13	What kind of visuals have you used?	I use bar and column charts for comparisons, line charts for trends, pie charts for proportions, and KPI cards for highlighting key metrics.
+14	Difference between slicer and filter?	Slicers are interactive, visible controls on the report canvas for users, while filters are applied behind the scenes via the Filter Pane.
+15	Visual vs. Page Level Filters?	Visual-level filters restrict only one specific chart, whereas page-level filters apply to all visuals on that specific report page.
+16	What is Power BI Service?	It is a cloud-based platform used to publish, share, and collaborate on reports, enabling scheduled refreshes and secure access from anywhere.
+17	Have you worked on report sharing?	Yes, I share reports via secured workspaces and automated email subscriptions to keep stakeholders updated without manual intervention.
+18	What ETL tools have you used?	I primarily use SQL for ETL and Power Query within Power BI for data cleaning and transformation, along with Snowflake for cloud storage.
+19	Was your source on-premise or cloud?	I have worked with both, using an on-premises SQL Server with a Data Gateway, and connecting directly to Snowflake for cloud-based data.
+20	Which gateway did you connect?	I used the On-Premises Data Gateway to act as a secure bridge for refreshing local SQL Server data in the cloud.
+21	What was your workspace capacity?	My reports were deployed in a Shared Capacity environment, which is the standard default for most Power BI users.
+22	Why check the user license?	It ensures the user has legal access to the BI environment and verifies they have the appropriate rights to view the report content.
+23	How comfortable are you building reports?	Very comfortable. I have extensive experience building end-to-end dashboards, from SQL extraction and data modeling to final visualization.
+ 
