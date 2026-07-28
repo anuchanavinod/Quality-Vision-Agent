@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quality Vision Agent | Interactive Client Prototype</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --surface:#ffffff;
+    --surface-soft:#f8fafc;
+    --surface-blue:#eef5fb;
+    --border:#d6e1ec;
+    --border-strong:#c5d5e4;
+    --ink:#101827;
+    --muted:#60738f;
+    --muted-2:#8090a6;
+    --navy:#023f6b;
+    --blue:#006da8;
+    --blue-2:#0a86bf;
+    --teal:#008f87;
+    --teal-soft:#e5f5f3;
+    --green:#0f9f49;
+    --green-soft:#e8f7ee;
+    --red:#df252b;
+    --red-soft:#fdebec;
+    --amber:#db7800;
+    --amber-soft:#fff2df;
+    --purple:#7437e7;
+    --purple-soft:#f1eafe;
+    --shadow:0 8px 24px rgba(14,43,74,.07);
+    --shadow-soft:0 3px 12px rgba(14,43,74,.055);
+    --radius:14px;
+    --radius-sm:9px;
+    --header-h:68px;
+    --left-w:clamp(220px,14.2vw,274px);
+    --right-w:clamp(340px,21.5vw,414px);
+    --font:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  .app{height:100vh;display:grid;grid-template-rows:var(--header-h) minmax(0,1fr);overflow:hidden}
+
+  /* Global header */
+  .global-header{
+    display:grid;
+    grid-template-columns:minmax(350px,430px) minmax(420px,1fr) auto;
+    align-items:center;
+    min-width:0;
+    height:var(--header-h);
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    z-index:40;
+  }
+  .brand-block{height:100%;display:flex;align-items:center;gap:16px;padding:0 26px;min-width:0}
+  .brand-logo{font-size:24px;font-weight:850;letter-spacing:-.8px;color:#0984aa;white-space:nowrap}
+  .brand-logo span{color:#763ce7}
+  .brand-divider{width:1px;height:30px;background:#bccddd;flex:0 0 auto}
+  .brand-title{font-size:16px;line-height:1.25;font-weight:750;max-width:245px}
+
+  .header-agents{display:flex;align-items:center;gap:14px;min-width:0;overflow:hidden}
+  .live-state{display:flex;align-items:center;gap:9px;color:#5c7190;white-space:nowrap;flex:0 0 auto}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#12a44b;box-shadow:0 0 0 4px rgba(18,164,75,.08)}
+  .agent-pills{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;white-space:nowrap}
+  .agent-pill{border:1px solid var(--border);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:750;line-height:1;background:#f7fbfd;color:var(--blue)}
+  .agent-pill.yield{color:var(--purple);background:#f7f2ff}
+  .agent-pill.pdm{color:#d76800;background:#fff7ea}
+  .agent-pill.energy{color:#f05b23;background:#fff4ef}
+  .agent-pill.supply{color:#0d9a42;background:#eefaf1}
+  .agent-pill.safety{color:#db2529;background:#fff0f1}
+  .agent-pill.semantic{color:#008b84;background:#edf9f8}
+
+  .header-actions{height:100%;display:flex;align-items:center;gap:9px;padding:0 24px 0 14px;white-space:nowrap}
+  .plant-switch{display:flex;align-items:center;gap:7px}
+  .plant-chip{height:48px;min-width:54px;border:1px solid var(--border-strong);border-radius:50%;background:#fff;color:#60738f;line-height:1.1;font-weight:650;transition:.15s}
+  .plant-chip.active{border-color:var(--teal);background:#edf9f7;color:var(--teal)}
+  .alert-chip{height:28px;padding:0 12px;border-radius:7px;border:1px solid #f4c7c8;background:#fff2f2;color:#d9272d;font-weight:800;font-size:12px;letter-spacing:.2px}
+  .alert-chip.info{border-color:#cbe4ef;background:#eef8fb;color:#047da5}
+  .alert-chip.semantic{border-color:#bfe3df;background:#edf8f7;color:#007f79}
+
+  /* App body */
+  .workspace{display:grid;grid-template-columns:var(--left-w) minmax(0,1fr) var(--right-w);height:100%;min-width:0;overflow:hidden}
+
+  /* Sidebar */
+  .sidebar{background:#fff;border-right:1px solid var(--border);min-width:0;overflow:hidden;display:flex;flex-direction:column}
+  .sidebar-scroll{overflow:auto;min-height:0;padding:20px 0 14px}
+  .nav-section{margin-bottom:18px}
+  .nav-heading{display:flex;align-items:center;justify-content:space-between;padding:0 20px 9px;color:#008c88;font-size:12px;font-weight:850;letter-spacing:1.6px}
+  .nav-item{width:100%;border:0;background:transparent;display:flex;align-items:center;gap:12px;min-height:46px;padding:0 22px;color:#61738e;text-align:left;font-size:16px;font-weight:600;border-left:4px solid transparent;transition:.15s}
+  .nav-item:hover{background:#f5f9fc;color:var(--blue)}
+  .nav-item.active{background:#eaf4f8;color:#006da8;border-left-color:#006da8}
+  .nav-icon{width:18px;height:18px;display:grid;place-items:center;color:currentColor;flex:0 0 auto}
+  .nav-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .nav-badge{margin-left:auto;min-width:27px;height:27px;border-radius:50%;background:#e3282d;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:850}
+  .sidebar-divider{border-top:1px solid var(--border);margin:8px 0 14px}
+  .side-kpis{padding:0 14px 12px;display:grid;gap:8px}
+  .side-kpi{min-height:51px;border:1px solid var(--border);border-radius:10px;background:#f3f7fb;padding:10px 13px;display:flex;align-items:center;justify-content:space-between}
+  .side-kpi-label{font-size:11px;color:#637794;letter-spacing:.5px}
+  .side-kpi-value{font-size:21px;font-weight:850;color:#0785a9}
+  .side-kpi-value.purple{color:#7a3ded}.side-kpi-value.navy{color:#006a99}.side-kpi-value.red{color:#dc2429}.side-kpi-value.teal{color:#008f88}
+
+  /* Center shell */
+  .center{min-width:0;min-height:0;background:var(--bg);display:grid;grid-template-rows:118px 52px minmax(0,1fr);border-top:4px solid #00699f}
+  .product-banner{background:#fff;border-bottom:1px solid var(--border);display:grid;grid-template-columns:132px minmax(0,1fr);align-items:center;padding:14px 26px 13px 26px;min-width:0}
+  .agent-name{font-size:21px;line-height:1.3;font-weight:850;text-align:center;letter-spacing:-.25px}
+  .agent-name .agent-code{display:inline-block;margin-right:9px;font-size:16px;color:#006da8;vertical-align:middle}
+  .banner-main{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .tech-pills{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+  .tech-pill{border:1px solid #bcd8e8;background:#edf7fb;color:#00699f;border-radius:7px;padding:6px 13px;font-size:13px;font-weight:800;letter-spacing:.35px;white-space:nowrap}
+  .tech-pill.target{border-color:#bce1dc;background:#eaf8f6;color:#008b82}
+  .banner-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .icon-button{height:38px;width:38px;border:1px solid var(--border);background:#fff;border-radius:9px;display:grid;place-items:center;color:#41617d;transition:.15s}
+  .icon-button:hover{border-color:#99bed3;background:#f3f9fc;color:#006da8}
+  .icon-button svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  .tabs{height:52px;background:#eef3f9;border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 24px;gap:1px;min-width:0;position:relative;z-index:10}
+  .tab{height:52px;border:0;background:transparent;padding:0 22px;color:#586b88;font-size:15px;font-weight:700;border-bottom:3px solid transparent;white-space:nowrap;transition:.15s}
+  .tab:hover{color:#006da8;background:rgba(255,255,255,.42)}
+  .tab.active{color:#005f96;border-bottom-color:#006da8;background:#f8fbfd}
+  .tabs-spacer{flex:1;min-width:10px}
+  .more-wrap{position:relative;display:flex;align-items:center}
+  .more-button{height:36px;border:1px solid var(--border-strong);border-radius:8px;background:#fff;color:#49617d;padding:0 12px;display:flex;align-items:center;gap:8px;font-weight:700}
+  .more-button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+  .more-menu{position:absolute;right:0;top:46px;width:236px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 36px rgba(14,43,74,.16);padding:7px;display:none;z-index:80}
+  .more-menu.open{display:block}
+  .more-item{width:100%;border:0;background:#fff;border-radius:8px;padding:10px 11px;display:flex;align-items:center;gap:10px;color:#304a67;text-align:left;font-weight:650}
+  .more-item:hover{background:#eef6fa;color:#006da8}
+  .more-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  .views{position:relative;min-width:0;min-height:0;overflow:hidden}
+  .view{position:absolute;inset:0;display:none;overflow:auto;padding:24px 26px 30px;scrollbar-width:thin;scrollbar-color:#bdcbd8 transparent}
+  .view.active{display:block}
+  .view::-webkit-scrollbar,.sidebar-scroll::-webkit-scrollbar,.right-scroll::-webkit-scrollbar{width:7px}
+  .view::-webkit-scrollbar-thumb,.sidebar-scroll::-webkit-scrollbar-thumb,.right-scroll::-webkit-scrollbar-thumb{background:#bdcbd8;border-radius:20px}
+
+  /* Shared UI */
+  .section-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .section-title{font-size:19px;font-weight:850;letter-spacing:-.2px;margin:0 0 4px}
+  .section-subtitle{font-size:13px;color:var(--muted);line-height:1.5}
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .btn{height:38px;border:1px solid var(--border-strong);border-radius:9px;background:#fff;color:#35516f;padding:0 13px;font-weight:750;display:inline-flex;align-items:center;gap:8px;transition:.15s;white-space:nowrap}
+  .btn:hover{background:#f3f8fb;border-color:#9bbdd0;color:#006da8}
+  .btn.primary{background:#006da8;border-color:#006da8;color:#fff}
+  .btn.primary:hover{background:#005b8e}
+  .btn.teal{background:#008f87;border-color:#008f87;color:#fff}
+  .btn.danger{color:#cf252b;border-color:#f1b9bc;background:#fff8f8}
+  .btn.small{height:31px;padding:0 10px;font-size:12px;border-radius:7px}
+  .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .badge{display:inline-flex;align-items:center;justify-content:center;min-height:26px;padding:0 10px;border-radius:6px;border:1px solid var(--border);font-size:12px;font-weight:850;letter-spacing:.3px;white-space:nowrap}
+  .badge.blue{background:#edf7fb;border-color:#bddbea;color:#006da8}
+  .badge.green{background:var(--green-soft);border-color:#bfe4ce;color:var(--green)}
+  .badge.red{background:var(--red-soft);border-color:#f4c3c5;color:var(--red)}
+  .badge.amber{background:var(--amber-soft);border-color:#f0d2a5;color:var(--amber)}
+  .badge.purple{background:var(--purple-soft);border-color:#dac8fb;color:var(--purple)}
+  .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-soft)}
+  .metric-label{font-size:12px;font-weight:800;color:#61738f;letter-spacing:.6px;text-transform:uppercase}
+  .metric-value{font-size:34px;line-height:1.1;font-weight:900;letter-spacing:-1px;margin-top:14px}
+  .metric-foot{margin-top:9px;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:6px}
+  .positive{color:var(--green)}.negative{color:var(--red)}.warning{color:var(--amber)}
+
+  /* Dashboard */
+  .live-strip{min-height:42px;border:1px solid #bcdfe0;background:#ecf8f7;border-radius:10px;padding:0 14px;display:flex;align-items:center;gap:16px;margin-bottom:14px;color:#23616a;overflow:hidden}
+  .live-strip-left{display:flex;align-items:center;gap:8px;font-weight:850;color:#007d78;white-space:nowrap}
+  .pulse{width:8px;height:8px;border-radius:50%;background:#0fa24b;box-shadow:0 0 0 0 rgba(15,162,75,.45);animation:pulse 2s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(15,162,75,0)}100%{box-shadow:0 0 0 0 rgba(15,162,75,0)}}
+  .live-separator{width:1px;height:20px;background:#b8d9d7}
+  .live-stat{white-space:nowrap;font-size:12px}.live-stat strong{font-size:13px;color:#174b56}
+  .live-strip-spacer{flex:1}
+
+  .how-panel{background:#e9f3f8;border:1px solid #bcd7e5;border-radius:13px;padding:17px 18px;margin-bottom:16px}
+  .how-title{font-size:15px;font-weight:850;color:#006b9f;margin-bottom:10px}
+  .how-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .how-card{background:#fff;border:1px solid #c9d9e6;border-radius:10px;padding:15px 16px;min-height:112px}
+  .how-card-title{font-size:14px;font-weight:850;color:#006a9f;margin-bottom:8px}
+  .how-card p{margin:0;color:#60738f;font-size:13px;line-height:1.55}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+  .kpi-card{min-height:139px;padding:20px 20px 17px;border-top:4px solid #006da8}
+  .kpi-card .metric-value.green{color:var(--green)}
+  .kpi-card .metric-value.red{color:var(--red)}
+
+  .dashboard-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .chart-card{padding:20px 20px 16px;min-height:292px}
+  .card-title{font-size:17px;font-weight:850;margin:0 0 4px}
+  .card-subtitle{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .chart-area{height:190px;position:relative}
+  .bar-chart{height:100%;display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 28px}
+  .y-axis{grid-row:1;grid-column:1;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding-right:8px;color:#71839a;font-size:11px}
+  .plot{grid-row:1;grid-column:2;position:relative;border-left:1px solid #9db2c5;border-bottom:1px solid #9db2c5;background-image:linear-gradient(to bottom,#d7e2ec 1px,transparent 1px);background-size:100% 25%}
+  .bars{position:absolute;inset:0 8px 0 8px;display:flex;align-items:flex-end;gap:7px}
+  .bar{flex:1;min-width:8px;max-width:30px;background:#268bb8;border-radius:5px 5px 0 0;opacity:.93;transition:.2s;height:30%}
+  .bar:hover{background:#006da8}
+  .x-axis{grid-row:2;grid-column:2;display:flex;justify-content:space-between;padding:6px 4px 0;color:#71839a;font-size:11px}
+  .defect-breakdown{display:grid;gap:12px;margin-top:18px}
+  .break-row{display:grid;grid-template-columns:minmax(130px,1fr) 52px;gap:12px;align-items:center}
+  .break-label{font-weight:650;margin-bottom:6px}
+  .progress{height:8px;background:#e7edf4;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:999px;background:#ee8b00;width:0;transition:.25s}
+  .break-value{text-align:right;font-weight:850;color:#db7900}
+
+  /* Defect Log */
+  .defect-list{display:grid;gap:12px}
+  .defect-card{background:#fff;border:1px solid #f0c9ca;border-left:6px solid var(--red);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-soft);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}
+  .defect-card.minor{border-color:#f0d8aa;border-left-color:#ef9400}
+  .defect-card.cosmetic{border-color:#bfe6cf;border-left-color:#0fa24b}
+  .defect-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .defect-component{font-size:15px;font-weight:850;margin-left:2px}
+  .defect-meta{display:grid;grid-template-columns:1.15fr 1fr .75fr;gap:20px;max-width:760px}
+  .meta-label{font-size:10px;letter-spacing:.6px;color:#6d7f97;text-transform:uppercase;margin-bottom:5px}
+  .meta-value{font-size:14px;font-weight:650}
+  .defect-side{min-width:185px;text-align:right;display:grid;gap:10px;justify-items:end}
+  .defect-time{font-size:12px;color:#6d7f97}
+  .defect-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+
+  /* Line Quality */
+  .line-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .line-card{padding:21px 22px 17px;min-height:190px}
+  .line-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
+  .line-name{font-size:18px;font-weight:900}
+  .line-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .line-metric{background:#f3f6fa;border:1px solid var(--border);border-radius:10px;text-align:center;padding:14px 8px}
+  .line-metric .label{font-size:10px;color:#667a96;text-transform:uppercase;margin-bottom:7px}
+  .line-metric .value{font-size:23px;font-weight:900}
+  .line-progress{height:9px;background:#e7edf3;border-radius:999px;overflow:hidden;margin-top:15px}
+  .line-progress>span{display:block;height:100%;border-radius:999px;background:#0fa24b}
+
+  /* Model */
+  .model-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+  .model-title{font-size:19px;font-weight:900;margin-bottom:4px}
+  .model-badges{display:flex;gap:8px}
+  .model-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+  .model-kpi{min-height:145px;padding:21px;border-top:4px solid #006da8}
+  .model-kpi .metric-value{font-size:35px}
+  .model-main-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:16px;margin-bottom:16px}
+  .model-panel{padding:22px;min-height:300px}
+  .importance-list{display:grid;gap:16px;margin-top:20px}
+  .importance-top{display:flex;justify-content:space-between;font-weight:650;margin-bottom:7px}
+  .importance-top strong{color:#006da8}
+  .history-list{display:grid;gap:11px;margin-top:17px}
+  .history-item{border:1px solid var(--border);background:#f3f6fa;border-radius:10px;padding:15px 16px;border-left:4px solid #cbd7e3}
+  .history-item.deployed{border-left-color:#0fa24b}
+  .history-line{display:flex;align-items:center;gap:10px;margin-bottom:8px}.history-date{font-size:16px;font-weight:850}
+  .history-meta{font-size:12px;color:#61738f}
+  .retrain-card{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .retrain-title{font-size:16px;font-weight:850;margin-bottom:4px}
+  .class-table-card{padding:20px;margin-top:16px}
+
+  /* Tables */
+  .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:11px;background:#fff}
+  table{width:100%;border-collapse:collapse;min-width:780px}
+  th{background:#eef4f8;color:#3f5874;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.55px;padding:12px 14px;border-bottom:1px solid var(--border)}
+  td{padding:13px 14px;border-bottom:1px solid #e7edf3;color:#334c68;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#f8fbfd}
+  .table-actions{display:flex;gap:6px}
+
+  /* Extra views */
+  .executive-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+  .impact-card{padding:19px;min-height:130px;border-top:4px solid var(--teal)}
+  .impact-card .metric-value{font-size:30px;color:#007f79}
+  .executive-main{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+  .insight-list{display:grid;gap:10px;margin-top:14px}
+  .insight-row{border:1px solid var(--border);border-radius:10px;padding:13px 14px;display:flex;align-items:flex-start;gap:12px;background:#fff}
+  .insight-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);margin-top:5px;flex:0 0 auto}
+  .inspection-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:16px}
+  .camera-wall{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .camera-card{border:1px solid var(--border);border-radius:12px;background:#101827;min-height:205px;position:relative;overflow:hidden;color:#fff}
+  .camera-scene{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#566575 0 8%,#2e3c4b 9% 21%,#1b2836 22% 40%,#111b27 41%);opacity:.9}
+  .camera-belt{position:absolute;left:-10%;right:-10%;top:55%;height:44px;background:repeating-linear-gradient(90deg,#8895a2 0 22px,#6d7a87 22px 28px);transform:perspective(250px) rotateX(52deg)}
+  .camera-part{position:absolute;width:92px;height:60px;left:50%;top:45%;transform:translate(-50%,-50%);border-radius:9px;background:#b7c1cb;box-shadow:inset 0 0 0 8px #83909e}
+  .camera-box{position:absolute;width:48px;height:36px;border:2px solid #ff3a3f;left:52%;top:35%}
+  .camera-label{position:absolute;left:12px;top:11px;background:rgba(10,22,36,.78);border:1px solid rgba(255,255,255,.18);padding:6px 9px;border-radius:7px;font-size:11px;font-weight:750}
+  .camera-status{position:absolute;right:12px;top:11px;background:#0b9b48;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:850}
+  .camera-footer{position:absolute;left:0;right:0;bottom:0;padding:9px 12px;background:linear-gradient(transparent,rgba(5,15,25,.95));font-size:11px;display:flex;justify-content:space-between}
+  .health-grid{display:grid;gap:10px}
+  .health-card{padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .health-title{font-weight:800;margin-bottom:4px}.health-meta{font-size:12px;color:var(--muted)}
+
+  /* Right insights */
+  .right-panel{background:#f7f9fc;border-left:1px solid var(--border);min-width:0;min-height:0;display:grid;grid-template-rows:56px minmax(0,1fr)}
+  .right-tabs{background:#fff;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr}
+  .right-tab{border:0;background:#fff;font-weight:750;color:#5d6f88;border-bottom:3px solid transparent}
+  .right-tab.active{color:#008c85;border-bottom-color:#008c85}
+  .right-scroll{min-height:0;overflow:auto;padding:16px 15px 22px}
+  .right-view{display:none}.right-view.active{display:block}
+  .semantic-card{border:1px solid #b9dedb;background:#e6f4f3;border-radius:13px;padding:14px 16px;margin-bottom:16px}
+  .semantic-title{font-size:13px;color:#00857f;font-weight:900;letter-spacing:1px;margin-bottom:6px}
+  .semantic-main{font-size:12px;font-weight:700;color:#45627a}.semantic-main strong{color:#df252b}
+  .semantic-sub{font-size:11px;color:#6d8196;font-style:italic;margin-top:5px}
+  .recommend-head{display:flex;align-items:center;justify-content:space-between;color:#7437e7;font-size:12px;font-weight:900;letter-spacing:.7px;border-bottom:1px solid #ded3f5;padding:4px 2px 10px;margin-bottom:11px}
+  .count-badge{min-width:23px;height:23px;border-radius:50%;background:#df252b;color:#fff;display:grid;place-items:center;font-size:11px}
+  .recommend-list{display:grid;gap:11px}
+  .recommend-card{background:#fff;border:1px solid #f1c3c5;border-left:5px solid #e4252b;border-radius:12px;padding:13px 14px;box-shadow:0 2px 8px rgba(14,43,74,.035)}
+  .recommend-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .priority{border:1px solid #bfe4ce;background:#eef9f2;color:#099847;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:900}
+  .recommend-title{font-size:14px;font-weight:850}.recommend-gain{margin-left:auto;color:#07993f;font-size:14px;font-weight:900}
+  .recommend-desc{color:#5e718e;font-size:12px;line-height:1.55}
+  .block-note{margin-top:9px;padding:8px 10px;border-radius:7px;background:#fdebec;color:#de2228;font-size:11px;font-weight:850}
+
+  .ai-shell{height:calc(100vh - var(--header-h) - 56px - 32px);min-height:460px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden}
+  .ai-head{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .ai-avatar{width:34px;height:34px;border-radius:10px;background:#e8f6f4;color:#008b84;display:grid;place-items:center;font-weight:900}
+  .ai-title{font-weight:850}.ai-online{font-size:11px;color:#0d9b48}
+  .chat-messages{overflow:auto;padding:14px;display:grid;align-content:start;gap:11px;background:#f8fafc}
+  .message{max-width:88%;padding:10px 12px;border-radius:11px;line-height:1.5;font-size:12px}
+  .message.ai{background:#fff;border:1px solid var(--border);color:#405a77}
+  .message.user{margin-left:auto;background:#007c9f;color:#fff}
+  .suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
+  .suggestion{border:1px solid #c3dae7;background:#fff;color:#006b9f;border-radius:999px;padding:7px 9px;font-size:10px;font-weight:700}
+  .chat-input{border-top:1px solid var(--border);padding:10px;display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:8px;background:#fff}
+  .chat-input input{height:38px;border:1px solid var(--border-strong);border-radius:9px;padding:0 11px;outline:none;min-width:0}
+  .chat-input input:focus{border-color:#61a8c9;box-shadow:0 0 0 3px rgba(0,109,168,.08)}
+  .send-button{border:0;background:#008c85;color:#fff;border-radius:9px;font-size:18px}
+
+  /* Modal & drawers */
+  .overlay{position:fixed;inset:var(--header-h) 0 0 0;background:rgba(10,25,42,.36);backdrop-filter:blur(2px);display:none;z-index:120}
+  .overlay.open{display:block}
+  .filter-drawer{position:absolute;right:0;top:0;bottom:0;width:min(420px,92vw);background:#fff;box-shadow:-18px 0 45px rgba(14,43,74,.18);padding:22px;display:flex;flex-direction:column}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.drawer-title{font-size:19px;font-weight:900}
+  .drawer-close{width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:8px;font-size:20px;color:#506781}
+  .filter-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#60738f;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .field select,.field input{width:100%;height:42px;border:1px solid var(--border-strong);border-radius:9px;background:#fff;padding:0 11px;color:#304b68;outline:none}
+  .drawer-actions{margin-top:auto;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px}
+  .modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(820px,90vw);max-height:86%;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(6,25,43,.28);overflow:auto}
+  .modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-size:18px;font-weight:900}.modal-body{padding:20px}
+  .evidence-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  .evidence-visual{height:310px;border-radius:12px;background:#152230;position:relative;overflow:hidden}
+  .evidence-visual .camera-scene{opacity:1}.evidence-visual .camera-belt{top:60%}.evidence-visual .camera-part{width:170px;height:110px}.evidence-visual .camera-box{width:72px;height:56px;left:55%;top:34%}
+  .evidence-panel{display:grid;align-content:start;gap:12px}
+  .detail-row{border-bottom:1px solid #e7edf3;padding-bottom:10px}.detail-row:last-child{border-bottom:0}.detail-label{font-size:10px;color:#6d7f97;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}.detail-value{font-weight:750;color:#2e4966}
+
+  .toast-stack{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:200}
+  .toast{background:#10263a;color:#fff;border-radius:10px;padding:12px 15px;box-shadow:0 12px 30px rgba(8,25,42,.22);min-width:270px;animation:toastIn .2s ease}
+  .toast strong{display:block;margin-bottom:3px}.toast span{font-size:12px;color:#c6d4df}
+  @keyframes toastIn{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+  /* Responsive desktop safeguards */
+  @media(max-width:1540px){
+    :root{--left-w:224px;--right-w:350px}
+    .global-header{grid-template-columns:350px minmax(360px,1fr) auto}
+    .header-actions{padding-right:12px}.agent-pill:nth-child(n+7){display:none}
+    .alert-chip.semantic{display:none}
+    .product-banner{padding-left:18px;padding-right:18px;grid-template-columns:118px 1fr}
+    .tech-pill{padding:6px 9px;font-size:12px}.tab{padding:0 16px}
+    .view{padding:20px}
+  }
+
+  @media(max-width:1450px){
+    :root{--left-w:210px;--right-w:330px}
+    .global-header{grid-template-columns:325px minmax(280px,1fr) auto}
+    .brand-block{padding-left:20px;padding-right:10px}
+    .agent-pill:nth-child(n+5){display:none}
+    .live-strip .badge{display:none}
+  }
+  @media(max-width:1320px){
+    :root{--left-w:205px;--right-w:320px}
+    .global-header{grid-template-columns:330px minmax(280px,1fr) auto}
+    .brand-block{padding-left:18px;padding-right:12px}.brand-title{font-size:14px}
+    .agent-pill:nth-child(n+5){display:none}.alert-chip:nth-of-type(2){display:none}
+    .how-card{padding:13px}.how-card p{font-size:12px}
+    .kpi-card{padding:16px}.metric-value{font-size:29px}
+    .defect-meta{gap:12px}.defect-side{min-width:155px}
+  }
+
+  /* Fully interactive action surfaces */
+  .action-modal{width:min(980px,92vw)}
+  .action-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:#fbfdff;position:sticky;bottom:0}
+  .action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .action-card{border:1px solid var(--border);border-radius:12px;padding:15px;background:#fbfdff}
+  .action-card h4{margin:0 0 7px;font-size:14px;color:#183b5c}.action-card p{margin:0;color:#60758f;line-height:1.55;font-size:13px}
+  .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+  .summary-tile{border:1px solid var(--border);border-radius:12px;padding:14px;background:#f8fbfe}
+  .summary-tile .label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#70839b;font-weight:800}
+  .summary-tile .value{font-size:24px;font-weight:900;color:#0a6f9f;margin-top:6px}
+  .control-room-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .control-camera{border:1px solid var(--border);border-radius:13px;overflow:hidden;background:#fff}
+  .control-camera-head,.control-camera-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+  .control-camera-head{background:#f6fafc;border-bottom:1px solid var(--border)}.control-camera-foot{border-top:1px solid var(--border);gap:8px}
+  .control-camera-visual{height:150px;position:relative;background:linear-gradient(180deg,#d7e8f1,#f3f7fa 62%,#9bb1bd 63%,#8aa1ad)}
+  .control-camera-visual:before{content:"";position:absolute;left:14%;right:14%;height:35px;bottom:28px;border-radius:7px;background:#607986;box-shadow:inset 0 0 0 7px #91a5af}
+  .control-camera.paused .control-camera-visual{filter:grayscale(.7);opacity:.7}.control-camera.paused .camera-live-state{background:#fff3d7;color:#a96600}
+  .camera-live-state{font-size:10px;font-weight:900;padding:4px 7px;border-radius:999px;background:#e4f7ed;color:#08793d}
+  .action-table{width:100%;border-collapse:collapse}.action-table th,.action-table td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:left;font-size:12px}.action-table th{color:#5d7188;background:#f6f9fc}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid .field.full{grid-column:1/-1}.form-grid textarea{width:100%;min-height:90px;border:1px solid var(--border-strong);border-radius:8px;padding:10px;resize:vertical}
+  .btn.loading{pointer-events:none;opacity:.72}.btn.loading:before{content:"";width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;margin-right:7px;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .recommend-card{cursor:pointer;transition:.15s}.recommend-card:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(20,58,91,.08)}
+  .camera-card{cursor:pointer;transition:.15s}.camera-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,58,91,.12)}
+  @media(max-width:900px){.summary-grid{grid-template-columns:repeat(2,1fr)}.control-room-grid,.action-grid,.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="global-header">
+    <div class="brand-block">
+      <div class="brand-logo">Manu<span>AI</span></div>
+      <div class="brand-divider"></div>
+      <div class="brand-title">Unified Manufacturing<br>Intelligence Platform</div>
+    </div>
+    <div class="header-agents">
+      <div class="live-state"><span class="live-dot"></span><span id="liveStateText">Live - 8 agents -<br>2 plants</span></div>
+      <div class="agent-pills" aria-label="Active agents">
+        <span class="agent-pill">OEE</span><span class="agent-pill yield">Yield</span><span class="agent-pill pdm">PdM+Parts</span><span class="agent-pill">Quality</span><span class="agent-pill energy">Energy</span><span class="agent-pill supply">Supply</span><span class="agent-pill yield">Twin</span><span class="agent-pill safety">Safety</span><span class="agent-pill semantic">Semantic</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="plant-switch" aria-label="Plant selector">
+        <button class="plant-chip active" data-plant="All">All<br>Plants</button>
+        <button class="plant-chip" data-plant="Plant 1">Plant<br>1</button>
+        <button class="plant-chip" data-plant="Plant 2">Plant<br>2</button>
+      </div>
+      <button class="alert-chip" id="criticalAssetsBtn"><span id="criticalAssetsCount">9</span> CRITICAL ASSETS</button>
+      <button class="alert-chip" id="safetyBtn"><span id="safetyCount">4</span> SAFETY</button>
+      <button class="alert-chip info" id="oeeBtn">OEE <span id="headerOee">66.1%</span></button>
+      <button class="alert-chip semantic" id="semanticBtn">SEMANTIC LAYER</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="sidebar-scroll">
+        <section class="nav-section">
+          <div class="nav-heading"><span>PLATFORM</span><span>⌄</span></div>
+          <button class="nav-item" data-nav-view="executive"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span>Unified Overview</button>
+          <button class="nav-item" data-module="Semantic Layer"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 12c2.2-4 4.5-4 6.8 0s4.7 4 7.2 0"/></svg></span>Semantic Layer</button>
+        </section>
+        <section class="nav-section">
+          <div class="nav-heading"><span>OPERATIONS</span><span>⌄</span></div>
+          <button class="nav-item" data-module="OEE Visibility"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg></span>OEE Visibility<span class="nav-badge">9</span></button>
+          <button class="nav-item" data-module="Yield Optimisation"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 18l4-5 4 2 5-8 3 3M5 20h15"/></svg></span>Yield Optimisation</button>
+          <button class="nav-item" data-module="Predictive Maintenance"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 19l4-4 3 3 7-8M15 10h4v4"/></svg></span>Predictive Maint.</button>
+          <button class="nav-item active" data-nav-view="dashboard"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.6-5 9.5-5 9.5 5 9.5 5-3.6 5-9.5 5-9.5-5-9.5-5z"/><circle cx="12" cy="12" r="2.5"/></svg></span>Quality Vision</button>
+        </section>
+        <section class="nav-section">
+          <div class="nav-heading"><span>SUSTAINABILITY</span><span>⌄</span></div>
+          <button class="nav-item" data-module="Energy Optimisation"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M13 2L6 13h6l-1 9 7-12h-6z"/></svg></span>Energy Optimisation</button>
+        </section>
+        <div class="sidebar-divider"></div>
+        <div class="side-kpis">
+          <div class="side-kpi"><span class="side-kpi-label">OEE</span><strong class="side-kpi-value" id="sideOee">66.1%</strong></div>
+          <div class="side-kpi"><span class="side-kpi-label">YIELD</span><strong class="side-kpi-value purple" id="sideYield">89.6%</strong></div>
+          <div class="side-kpi"><span class="side-kpi-label">QUALITY</span><strong class="side-kpi-value navy" id="sideQuality">98.9%</strong></div>
+          <div class="side-kpi"><span class="side-kpi-label">SAFETY</span><strong class="side-kpi-value red" id="sideSafety">4 open</strong></div>
+          <div class="side-kpi"><span class="side-kpi-label">BUS</span><strong class="side-kpi-value teal" id="sideBus">3 critical</strong></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="center">
+      <section class="product-banner">
+        <div class="agent-name"><span class="agent-code">Q2</span>Quality<br>Vision<br>Agent</div>
+        <div class="banner-main">
+          <div class="tech-pills">
+            <span class="tech-pill">INDUSTRIAL CAMERAS</span>
+            <span class="tech-pill">NVIDIA JETSON ONNX</span>
+            <span class="tech-pill">SAP QM</span>
+            <span class="tech-pill target">TARGET: -62% DEFECT ESCAPE, -38% INSPECTION LABOUR</span>
+          </div>
+          <div class="banner-tools">
+            <button class="icon-button" id="refreshBtn" title="Refresh live data"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg></button>
+            <button class="icon-button" id="filterBtn" title="Open analysis filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Quality Vision views">
+        <button class="tab active" data-view="dashboard">Dashboard</button>
+        <button class="tab" data-view="defects">Defect Log</button>
+        <button class="tab" data-view="lines">Line Quality</button>
+        <button class="tab" data-view="model">ML Model</button>
+        <div class="tabs-spacer"></div>
+        <div class="more-wrap">
+          <button class="more-button" id="moreBtn">More <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
+          <div class="more-menu" id="moreMenu">
+            <button class="more-item" data-view="inspection"><svg viewBox="0 0 24 24"><path d="M3 7h14v10H3zM17 10l4-2v8l-4-2"/></svg>Live Inspection</button>
+            <button class="more-item" data-view="library"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg>Defect Library</button>
+            <button class="more-item" data-view="executive"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Executive Cockpit</button>
+            <button class="more-item" data-view="health"><svg viewBox="0 0 24 24"><path d="M4 12h4l2-5 4 10 2-5h4"/></svg>Camera & Edge Health</button>
+          </div>
+        </div>
+      </nav>
+
+      <section class="views">
+        <section class="view active" id="view-dashboard">
+          <div class="live-strip">
+            <div class="live-strip-left"><span class="pulse"></span>VISION LIVE</div><span class="live-separator"></span>
+            <span class="live-stat"><strong id="liveCameras">8</strong> cameras online</span>
+            <span class="live-stat"><strong id="liveFps">96</strong> FPS</span>
+            <span class="live-stat"><strong>&lt;10 ms</strong> edge inference</span>
+            <span class="live-stat"><strong id="partsInspected">18,420</strong> parts inspected today</span>
+            <span class="live-strip-spacer"></span><span class="badge green">SAP QM SYNCED</span>
+          </div>
+
+          <div class="how-panel">
+            <div class="how-title">How It Works</div>
+            <div class="how-grid">
+              <div class="how-card"><div class="how-card-title">Edge Capture</div><p>Industrial cameras stream frames to NVIDIA Jetson. ONNX-optimised defect detection runs at the production edge.</p></div>
+              <div class="how-card"><div class="how-card-title">AI Classification</div><p>Each item is classified, accepted, rejected or flagged for re-inspection. Quality events are logged to MES in real time.</p></div>
+              <div class="how-card"><div class="how-card-title">Federated Learning</div><p>Plants improve a shared model without raw images leaving site. Approved non-conformances flow to SAP QM.</p></div>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <article class="card kpi-card"><div class="metric-label">Plant Quality Rate</div><div class="metric-value green" id="qualityRate">98.9%</div><div class="metric-foot positive">▲ <span id="qualityBaseline">+1.0% vs baseline</span></div></article>
+            <article class="card kpi-card"><div class="metric-label">Defect Escape Reduction</div><div class="metric-value green" id="escapeReduction">58.5%</div><div class="metric-foot positive">▲ target 38%</div></article>
+            <article class="card kpi-card"><div class="metric-label">Defects Today</div><div class="metric-value red" id="defectsToday">33</div><div class="metric-foot"><span id="activeLines">4 lines</span></div></article>
+            <article class="card kpi-card"><div class="metric-label">Inspection Labour Reduction</div><div class="metric-value green" id="labourReduction">42%</div><div class="metric-foot positive">▲ target 38%</div></article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="card chart-card">
+              <h3 class="card-title">Defect Trend - Today (Hourly)</h3><div class="card-subtitle">Real-time MES logging · Updates from current filters</div>
+              <div class="chart-area"><div class="bar-chart"><div class="y-axis"><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span></div><div class="plot"><div class="bars" id="trendBars"></div></div><div class="x-axis"><span>06:00</span><span>09:00</span><span>12:00</span><span>15:00</span><span>18:00</span></div></div></div>
+            </article>
+            <article class="card chart-card">
+              <h3 class="card-title">Defect Types Detected</h3><div class="card-subtitle">Current filtered production context</div>
+              <div class="defect-breakdown" id="defectBreakdown"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-defects">
+          <div class="section-title-row"><div><h2 class="section-title">Defect Log - Real-time</h2><div class="section-subtitle">Industrial camera → Jetson → MES · SAP QM non-conformance auto-created where required</div></div><div class="toolbar"><button class="btn" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 20h14"/></svg>Export NCRs</button><button class="btn teal" id="syncBtn"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>Sync MES</button><span class="badge red" id="majorToday">11 MAJOR TODAY</span></div></div>
+          <div class="defect-list" id="defectList"></div>
+        </section>
+
+        <section class="view" id="view-lines">
+          <div class="section-title-row"><div><h2 class="section-title">Line Quality Dashboard</h2><div class="section-subtitle">World-class ≥ 99% · Acceptable ≥ 98% · Warning below 98% · Model deployment tracked per line</div></div><div class="toolbar"><button class="btn" id="compareLinesBtn">Compare selected period</button></div></div>
+          <div class="line-grid" id="lineGrid"></div>
+        </section>
+
+        <section class="view" id="view-model">
+          <div class="model-hero"><div><div class="model-title">Vision ML Model - ONNX Edge Inference</div><div class="section-subtitle">Federated retraining · NVIDIA Jetson TensorRT · SAP QM trigger</div></div><div class="model-badges"><span class="badge green">V3.1 DEPLOYED</span><span class="badge blue">mAP 0.964</span></div></div>
+          <div class="model-kpis">
+            <article class="card model-kpi"><div class="metric-label">mAP Score</div><div class="metric-value positive">0.964</div><div class="metric-foot positive">▲ +0.016 vs previous</div></article>
+            <article class="card model-kpi"><div class="metric-label">Precision</div><div class="metric-value" style="color:#006da8">0.971</div><div class="metric-foot">Low false positives</div></article>
+            <article class="card model-kpi"><div class="metric-label">Edge Latency</div><div class="metric-value" style="color:#2869db">&lt;10ms</div><div class="metric-foot">ONNX TensorRT</div></article>
+            <article class="card model-kpi"><div class="metric-label">Defect Classes</div><div class="metric-value" style="color:#078aa4">5</div><div class="metric-foot">Federated retraining</div></article>
+          </div>
+          <div class="model-main-grid">
+            <article class="card model-panel"><h3 class="card-title">Feature Importance</h3><div class="importance-list" id="importanceList"></div></article>
+            <article class="card model-panel"><h3 class="card-title">Training History</h3><div class="history-list" id="trainingHistoryList"><div class="history-item deployed"><div class="history-line"><span class="history-date">Apr 10</span><span class="badge green">DEPLOYED</span></div><div class="history-meta">mAP 0.964 · Precision 0.971 · 18,400 samples</div></div><div class="history-item"><div class="history-line"><span class="history-date">Mar 27</span><span class="badge">ARCHIVED</span></div><div class="history-meta">mAP 0.948 · Precision 0.953 · 17,200 samples</div></div><div class="history-item"><div class="history-line"><span class="history-date">Mar 13</span><span class="badge">ARCHIVED</span></div><div class="history-meta">mAP 0.931 · Precision 0.938 · 16,100 samples</div></div></div></article>
+          </div>
+          <article class="card retrain-card"><div><div class="retrain-title">Federated Retraining</div><div class="section-subtitle">Raw images never leave plant · Gradient aggregation only · Approval workflow enabled</div></div><button class="btn primary" id="retrainBtn">Request Retraining</button></article>
+          <article class="card class-table-card"><div class="section-title-row" style="margin-bottom:12px"><div><h3 class="card-title">Class-wise Model Performance</h3><div class="card-subtitle">Reliability by defect class; reveals weaknesses hidden by overall model averages</div></div></div><div class="table-wrap"><table><thead><tr><th>Defect Class</th><th>Precision</th><th>Recall</th><th>Escape Risk</th><th>Sample Volume</th><th>Status</th></tr></thead><tbody id="classPerformanceBody"></tbody></table></div></article>
+        </section>
+
+        <section class="view" id="view-library">
+          <div class="section-title-row"><div><h2 class="section-title">Defect Library & NCR History</h2><div class="section-subtitle">Searchable traceability across defects, owners, resolutions and enterprise-system status</div></div><div class="toolbar"><button class="btn" id="libraryExport">Export History</button></div></div>
+          <div class="table-wrap"><table><thead><tr><th>NCR ID</th><th>Defect</th><th>Plant / Line</th><th>Component</th><th>Owner</th><th>Status</th><th>SAP QM</th><th>Resolution</th><th></th></tr></thead><tbody id="libraryBody"></tbody></table></div>
+        </section>
+
+        <section class="view" id="view-executive">
+          <div class="section-title-row"><div><h2 class="section-title">Executive Quality Cockpit</h2><div class="section-subtitle">Business impact and cross-plant quality outcomes derived from the selected operating context</div></div><div class="toolbar"><button class="btn" id="executiveExport">Generate Executive Report</button></div></div>
+          <div class="executive-grid">
+            <article class="card impact-card"><div class="metric-label">Estimated CoPQ Avoided</div><div class="metric-value" id="costAvoided">$128K</div><div class="metric-foot positive">▲ 14.2% vs previous period</div></article>
+            <article class="card impact-card"><div class="metric-label">Inspection Hours Saved</div><div class="metric-value" id="hoursSaved">684</div><div class="metric-foot">Current month estimate</div></article>
+            <article class="card impact-card"><div class="metric-label">Escapes Prevented</div><div class="metric-value" id="escapesPrevented">57</div><div class="metric-foot">Validated through NCR closure</div></article>
+            <article class="card impact-card"><div class="metric-label">First-pass Yield Gain</div><div class="metric-value" id="yieldGain">+1.8%</div><div class="metric-foot positive">Across selected plants</div></article>
+          </div>
+          <div class="executive-main"><article class="card chart-card"><h3 class="card-title">Quality Performance by Line</h3><div class="card-subtitle">Current context comparison</div><div id="executiveLineChart" class="defect-breakdown"></div></article><article class="card chart-card"><h3 class="card-title">Management Insights</h3><div class="insight-list" id="managementInsights"></div></article></div>
+        </section>
+
+        <section class="view" id="view-inspection">
+          <div class="section-title-row"><div><h2 class="section-title">Live Vision Inspection</h2><div class="section-subtitle">Camera streams, edge inference and current inspection decisions</div></div><div class="toolbar"><span class="badge green" id="inspectionCameraBadge">8 / 8 CAMERAS ONLINE</span><button class="btn" id="openControlRoomBtn">Open Control Room</button></div></div>
+          <div class="inspection-grid"><div class="camera-wall" id="cameraWall"></div><div><article class="card model-panel" style="min-height:auto;margin-bottom:14px"><h3 class="card-title">Inspection Throughput</h3><div class="importance-list"><div><div class="importance-top"><span>Parts inspected</span><strong id="inspectionParts">18,420</strong></div></div><div><div class="importance-top"><span>Pass rate</span><strong id="inspectionPass">98.9%</strong></div></div><div><div class="importance-top"><span>Defects identified</span><strong id="inspectionDefects">33</strong></div></div><div><div class="importance-top"><span>Median inference</span><strong>8.6 ms</strong></div></div></div></article><article class="card model-panel" style="min-height:auto"><h3 class="card-title">Latest Decision</h3><div id="latestDecision" class="section-subtitle" style="margin-top:14px;line-height:1.7"></div></article></div></div>
+        </section>
+
+        <section class="view" id="view-health">
+          <div class="section-title-row"><div><h2 class="section-title">Camera & Edge Device Health</h2><div class="section-subtitle">Inspection coverage depends on camera uptime, frame quality, edge latency and model availability</div></div><div class="toolbar"><button class="btn" id="healthRefresh">Run Health Check</button></div></div>
+          <div class="health-grid" id="healthGrid"></div>
+        </section>
+      </section>
+    </main>
+
+    <aside class="right-panel">
+      <div class="right-tabs"><button class="right-tab active" data-right="insights">Insights</button><button class="right-tab" data-right="ai">Unified AI</button></div>
+      <div class="right-scroll">
+        <section class="right-view active" id="right-insights">
+          <div class="semantic-card"><div class="semantic-title">SEMANTIC LAYER ACTIVE</div><div class="semantic-main"><strong id="semanticBlocked">22 actions blocked</strong> · 8 agents · <span id="semanticPlant">All Plants</span></div><div class="semantic-sub" id="semanticBreakdown">4 safety · 4 PdM · 14 yield</div></div>
+          <div class="recommend-head"><span>YIELD RECOMMENDATIONS</span><span class="count-badge" id="recommendCount">6</span></div>
+          <div class="recommend-list" id="recommendList">
+            <div class="recommend-card"><div class="recommend-top"><span class="priority">HIGH</span><span class="recommend-title">Reactor Temp</span><span class="recommend-gain">+1.2%</span></div><div class="recommend-desc">183.7 → 186 °C. BLOCKED — semantic conflict active.</div><div class="block-note">Semantic Layer block active</div></div>
+            <div class="recommend-card"><div class="recommend-top"><span class="priority">HIGH</span><span class="recommend-title">Pressure</span><span class="recommend-gain">0.0%</span></div><div class="recommend-desc">8.4 → 8.4 bar. BLOCKED — semantic conflict active.</div><div class="block-note">Semantic Layer block active</div></div>
+            <div class="recommend-card"><div class="recommend-top"><span class="priority">HIGH</span><span class="recommend-title">Mixing Speed</span><span class="recommend-gain">+3.4%</span></div><div class="recommend-desc">381.5 → 395 RPM. BLOCKED — semantic conflict active.</div><div class="block-note">Semantic Layer block active</div></div>
+            <div class="recommend-card"><div class="recommend-top"><span class="priority">HIGH</span><span class="recommend-title">Feed Rate</span><span class="recommend-gain">+2.5%</span></div><div class="recommend-desc">Proposed increase conflicts with current quality guardrail.</div><div class="block-note">Semantic Layer block active</div></div>
+          </div>
+        </section>
+        <section class="right-view" id="right-ai">
+          <div class="ai-shell"><div class="ai-head"><div class="ai-avatar">AI</div><div><div class="ai-title">Quality Vision Assistant</div><div class="ai-online">● Online · Uses current filters</div></div></div><div class="chat-messages" id="chatMessages"><div class="message ai">Ask about defects, line performance, recurring components, NCR status or model reliability.</div><div class="suggestions"><button class="suggestion">Which line needs attention?</button><button class="suggestion">Top defect today</button><button class="suggestion">Which class needs retraining?</button></div></div><form class="chat-input" id="chatForm"><input id="chatText" autocomplete="off" placeholder="Ask a quality question…"><button class="send-button" aria-label="Send">→</button></form></div>
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="overlay" id="filterOverlay" aria-hidden="true"><aside class="filter-drawer"><div class="drawer-head"><div><div class="drawer-title">Analysis Filters</div><div class="section-subtitle">Apply one context across all Quality Vision views</div></div><button class="drawer-close" data-close-overlay="filterOverlay">×</button></div><div class="filter-form"><div class="field"><label>Plant</label><select id="filterPlant"><option>All</option><option>Plant 1</option><option>Plant 2</option></select></div><div class="field"><label>Line</label><select id="filterLine"><option>All</option><option>Line A</option><option>Line B</option><option>Line C</option><option>Line D</option></select></div><div class="field"><label>Shift</label><select id="filterShift"><option>All</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select></div><div class="field"><label>Period</label><select id="filterPeriod"><option value="today">Today</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select></div><div class="field"><label>Defect type</label><select id="filterType"><option>All</option><option>Dimensional tolerance</option><option>Surface crack</option><option>Surface scratch</option><option>Assembly misalignment</option><option>Porosity</option></select></div><div class="field"><label>Severity</label><select id="filterSeverity"><option>All</option><option>Major</option><option>Minor</option><option>Cosmetic</option></select></div><div class="field full"><label>Component</label><select id="filterComponent"><option>All</option><option>Housing MCH-03</option><option>Bracket MCH-01</option><option>Weld joint</option><option>Shaft MCH-05</option><option>Valve body</option></select></div></div><div class="drawer-actions"><button class="btn" id="resetFilters">Reset</button><button class="btn primary" id="applyFilters">Apply Filters</button></div></aside></div>
+
+<div class="overlay" id="evidenceOverlay" aria-hidden="true"><div class="modal"><div class="modal-head"><div class="modal-title" id="evidenceTitle">Defect Evidence</div><button class="drawer-close" data-close-overlay="evidenceOverlay">×</button></div><div class="modal-body"><div class="evidence-grid"><div class="evidence-visual"><div class="camera-scene"></div><div class="camera-belt"></div><div class="camera-part"></div><div class="camera-box"></div><div class="camera-label">AI DEFECT REGION</div></div><div class="evidence-panel" id="evidenceDetails"></div></div></div></div></div>
+
+<div class="overlay" id="actionOverlay" aria-hidden="true">
+  <div class="modal action-modal">
+    <div class="modal-head">
+      <div><div class="modal-title" id="actionTitle">Action</div><div class="section-subtitle" id="actionSubtitle"></div></div>
+      <button class="drawer-close" data-close-overlay="actionOverlay">×</button>
+    </div>
+    <div class="modal-body" id="actionBody"></div>
+    <div class="action-footer" id="actionFooter"></div>
+  </div>
+</div>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+(function(){
+  'use strict';
+  const TYPES=['Dimensional tolerance','Surface crack','Surface scratch','Assembly misalignment','Porosity'];
+  const COMPONENTS=['Housing MCH-03','Bracket MCH-01','Weld joint','Shaft MCH-05','Valve body'];
+  const LINES=['Line A','Line B','Line C','Line D'];
+  const SHIFTS=['Shift A','Shift B','Shift C'];
+  const PLANT_LINES={'All':LINES,'Plant 1':['Line A','Line B'],'Plant 2':['Line C','Line D']};
+  const BASE_QUALITY={'Line A':99.2,'Line B':97.8,'Line C':98.9,'Line D':99.6};
+  const PLANT_PROFILE={
+    'All':{oee:66.1,yield:89.6,safety:4,critical:9,bus:3,cameras:8,fps:96,share:1,blocked:22,pdm:4,yieldBlocks:14,cost:128,hours:684,escapes:57,labour:42},
+    'Plant 1':{oee:68.4,yield:91.2,safety:1,critical:4,bus:1,cameras:4,fps:97,share:.56,blocked:9,pdm:2,yieldBlocks:6,cost:76,hours:394,escapes:34,labour:45},
+    'Plant 2':{oee:63.8,yield:87.9,safety:3,critical:5,bus:2,cameras:4,fps:94,share:.44,blocked:13,pdm:2,yieldBlocks:8,cost:52,hours:290,escapes:23,labour:39}
+  };
+  const CAMERAS=[
+    {id:'CAM-01A',plant:'Plant 1',line:'Line A',status:'Online',fps:97,latency:8.2,paused:false,ack:false},
+    {id:'CAM-02A',plant:'Plant 1',line:'Line B',status:'Online',fps:96,latency:8.8,paused:false,ack:false},
+    {id:'CAM-03A',plant:'Plant 1',line:'Line A',status:'Online',fps:95,latency:9.1,paused:false,ack:false},
+    {id:'CAM-04A',plant:'Plant 1',line:'Line B',status:'Online',fps:94,latency:9.4,paused:false,ack:false},
+    {id:'CAM-01B',plant:'Plant 2',line:'Line C',status:'Online',fps:95,latency:8.5,paused:false,ack:false},
+    {id:'CAM-02B',plant:'Plant 2',line:'Line D',status:'Online',fps:96,latency:8.4,paused:false,ack:false},
+    {id:'CAM-03B',plant:'Plant 2',line:'Line C',status:'Warning',fps:74,latency:12.4,paused:false,ack:false},
+    {id:'CAM-04B',plant:'Plant 2',line:'Line D',status:'Online',fps:93,latency:9.6,paused:false,ack:false}
+  ];
+  const state={view:'dashboard',right:'insights',filters:{plant:'All',line:'All',shift:'All',period:'today',type:'All',severity:'All',component:'All'},defects:[],inspectionCount:18420,lastSync:new Date(),healthChecks:0,retrainRequests:[],lastRefresh:new Date()};
+
+  const $=s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
+  const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const fmtDate=d=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d);
+  const isToday=d=>d.toDateString()===new Date().toDateString();
+  function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
+  function generateDefects(){
+    const today=new Date();const seed=Number(String(today.getFullYear())+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0'));const random=rng(seed);const arr=[];let serial=4500;
+    const linePlan=[...Array(4).fill('Line A'),...Array(18).fill('Line B'),...Array(9).fill('Line C'),...Array(2).fill('Line D')];
+    const typePlan=[...Array(10).fill('Dimensional tolerance'),...Array(8).fill('Surface crack'),...Array(8).fill('Surface scratch'),...Array(7).fill('Assembly misalignment')];
+    for(let i=linePlan.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[linePlan[i],linePlan[j]]=[linePlan[j],linePlan[i]]}
+    for(let i=typePlan.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[typePlan[i],typePlan[j]]=[typePlan[j],typePlan[i]]}
+    linePlan.forEach((line,i)=>{const d=new Date(today);const hour=6+(i%12);d.setHours(hour,Math.floor(random()*60),0,0);const type=typePlan[i],severity=type==='Surface crack'||type==='Assembly misalignment'?(random()>.18?'Major':'Minor'):(type==='Surface scratch'?(random()>.45?'Cosmetic':'Minor'):(random()>.76?'Major':'Minor'));const plant=line==='Line A'||line==='Line B'?'Plant 1':'Plant 2';const action=severity==='Major'?'Rejected':severity==='Minor'?'Re-inspect':'Accepted';arr.push({id:'DEF-'+String(serial--).padStart(4,'0'),ncr:severity==='Cosmetic'?'—':'NCR-'+String(1200-i).padStart(4,'0'),plant,line,shift:hour<10?'Shift A':hour<14?'Shift B':'Shift C',date:d,type,severity,component:COMPONENTS[TYPES.indexOf(type)],confidence:Math.round(91+random()*8),action,status:i%5===0?'Closed':i%3===0?'Assigned':'Open',owner:i%4===0?'R. Patel':i%4===1?'S. Kumar':i%4===2?'M. Chen':'A. Jones',sap:severity==='Cosmetic'?'Not required':i%4===0?'Synced':'Pending',camera:CAMERAS.find(c=>c.line===line).id});});
+    for(let i=0;i<53;i++){const d=new Date(today);d.setDate(today.getDate()-(1+Math.floor(random()*29)));d.setHours(6+Math.floor(random()*13),Math.floor(random()*60),0,0);const type=TYPES[Math.floor(random()*TYPES.length)],severity=type==='Surface crack'||type==='Assembly misalignment'?(random()>.28?'Major':'Minor'):(type==='Surface scratch'?(random()>.48?'Cosmetic':'Minor'):(random()>.72?'Major':'Minor'));const line=LINES[Math.floor(random()*LINES.length)],plant=line==='Line A'||line==='Line B'?'Plant 1':'Plant 2',action=severity==='Major'?'Rejected':severity==='Minor'?'Re-inspect':'Accepted';arr.push({id:'DEF-'+String(serial--).padStart(4,'0'),ncr:severity==='Cosmetic'?'—':'NCR-'+String(1160-i).padStart(4,'0'),plant,line,shift:SHIFTS[Math.floor(random()*3)],date:d,type,severity,component:COMPONENTS[TYPES.indexOf(type)],confidence:Math.round(89+random()*10),action,status:i%5===0?'Closed':i%3===0?'Assigned':'Open',owner:i%4===0?'R. Patel':i%4===1?'S. Kumar':i%4===2?'M. Chen':'A. Jones',sap:severity==='Cosmetic'?'Not required':i%4===0?'Synced':'Pending',camera:CAMERAS.find(c=>c.line===line).id});}
+    return arr.sort((a,b)=>b.date-a.date);
+  }
+  state.defects=generateDefects();
+
+  function profile(){return PLANT_PROFILE[state.filters.plant]||PLANT_PROFILE.All}
+  function visibleLines(){const plantLines=PLANT_LINES[state.filters.plant]||LINES;return state.filters.line==='All'?plantLines:plantLines.filter(l=>l===state.filters.line)}
+  function visibleCameras(){return CAMERAS.filter(c=>(state.filters.plant==='All'||c.plant===state.filters.plant)&&(state.filters.line==='All'||c.line===state.filters.line))}
+  function filteredDefects(){const f=state.filters,now=new Date();return state.defects.filter(x=>{const age=(now-x.date)/86400000;return(f.plant==='All'||x.plant===f.plant)&&(f.line==='All'||x.line===f.line)&&(f.shift==='All'||x.shift===f.shift)&&(f.type==='All'||x.type===f.type)&&(f.severity==='All'||x.severity===f.severity)&&(f.component==='All'||x.component===f.component)&&(f.period==='today'?isToday(x.date):age<=Number(f.period))})}
+  function todayContext(){return filteredDefects().filter(x=>isToday(x.date))}
+  function nonPlantFactor(){let f=1;if(state.filters.line!=='All')f*=.5;if(state.filters.shift!=='All')f*=.34;if(state.filters.type!=='All')f*=.28;if(state.filters.severity!=='All')f*=.45;if(state.filters.component!=='All')f*=.24;return Math.max(.08,f)}
+  function averageQuality(lines){if(!lines.length)return 0;return lines.reduce((s,l)=>s+BASE_QUALITY[l],0)/lines.length}
+  function syncLineOptions(plant=state.filters.plant,current=state.filters.line){const sel=$('#filterLine'),lines=PLANT_LINES[plant]||LINES;sel.innerHTML='<option>All</option>'+lines.map(l=>'<option>'+l+'</option>').join('');sel.value=current!=='All'&&lines.includes(current)?current:'All'}
+
+  function showView(name){state.view=name;$$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===name));if(!['dashboard','defects','lines','model'].includes(name)){$$('.tab').forEach(t=>t.classList.remove('active'));$('#moreBtn').textContent=({inspection:'Live Inspection',library:'Defect Library',executive:'Executive Cockpit',health:'Device Health'}[name]||'More')+' ';const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.innerHTML='<path d="M7 10l5 5 5-5"/>';$('#moreBtn').appendChild(svg)}else $('#moreBtn').innerHTML='More <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg>';$('#moreMenu').classList.remove('open')}
+  function setRight(name){state.right=name;$$('.right-tab').forEach(x=>x.classList.toggle('active',x.dataset.right===name));$$('.right-view').forEach(v=>v.classList.toggle('active',v.id==='right-'+name))}
+  function setPlant(plant){state.filters.plant=plant;if(state.filters.line!=='All'&&!PLANT_LINES[plant].includes(state.filters.line))state.filters.line='All';$('#filterPlant').value=plant;syncLineOptions();$$('.plant-chip').forEach(b=>b.classList.toggle('active',b.dataset.plant===plant));renderAll();toast('Plant context updated',plant==='All'?'Showing consolidated data for both plants.':'All screens now show '+plant+' data only.')}
+  function renderAll(){renderChrome();renderDashboard();renderDefects();renderLines();renderModel();renderLibrary();renderExecutive();renderInspection();renderHealth();renderRightPanel()}
+
+  function renderChrome(){const p=profile(),plant=state.filters.plant;$('#liveStateText').innerHTML='Live - 8 agents -<br>'+(plant==='All'?'2 plants':'1 plant');$('#criticalAssetsCount').textContent=p.critical;$('#safetyCount').textContent=p.safety;$('#headerOee').textContent=p.oee.toFixed(1)+'%';$('#sideOee').textContent=p.oee.toFixed(1)+'%';$('#sideYield').textContent=p.yield.toFixed(1)+'%';$('#sideSafety').textContent=p.safety+' open';$('#sideBus').textContent=p.bus+' critical';$('#semanticPlant').textContent=plant==='All'?'All Plants':plant;$('#semanticBlocked').textContent=p.blocked+' actions blocked';$('#semanticBreakdown').textContent=p.safety+' safety · '+p.pdm+' PdM · '+p.yieldBlocks+' yield'}
+  function renderDashboard(){const data=todayContext(),p=profile(),lines=visibleLines(),quality=averageQuality(lines),inspected=Math.round(state.inspectionCount*p.share*nonPlantFactor()),defects=data.length,cams=visibleCameras(),active=cams.filter(c=>!c.paused&&c.status!=='Offline');const fps=active.length?Math.round(active.reduce((s,c)=>s+c.fps,0)/active.length):0;$('#liveCameras').textContent=active.length;$('#liveFps').textContent=fps;$('#partsInspected').textContent=inspected.toLocaleString('en-US');$('#defectsToday').textContent=defects;$('#activeLines').textContent=lines.length+' line'+(lines.length===1?'':'s');$('#qualityRate').textContent=quality.toFixed(1)+'%';$('#sideQuality').textContent=quality.toFixed(1)+'%';$('#inspectionParts').textContent=inspected.toLocaleString('en-US');$('#inspectionDefects').textContent=defects;$('#inspectionPass').textContent=quality.toFixed(1)+'%';$('#escapeReduction').textContent=(58.5+(98.9-quality)*1.4).toFixed(1)+'%';$('#labourReduction').textContent=p.labour+'%';$('#qualityBaseline').textContent=(quality>=97.9?'+':'')+(quality-97.9).toFixed(1)+'% vs baseline';const hours=[6,7,8,9,10,11,12,13,14,15,16,17],counts=hours.map(h=>data.filter(d=>d.date.getHours()===h).length),max=Math.max(4,...counts);$('#trendBars').innerHTML=counts.map(c=>'<div class="bar" title="'+c+' defects" style="height:'+Math.max(5,c/max*100)+'%"></div>').join('');const map={};data.forEach(d=>map[d.type]=(map[d.type]||0)+1);const total=Math.max(1,data.length),colors=['#ed8b00','#ef3c42','#f28b25','#7b4ee8','#008f87'];$('#defectBreakdown').innerHTML=TYPES.slice(0,4).map((t,i)=>{const pct=Math.round((map[t]||0)/total*100);return '<div class="break-row"><div><div class="break-label">'+esc(t)+'</div><div class="progress"><div class="progress-fill" style="width:'+pct+'%;background:'+colors[i]+'"></div></div></div><div class="break-value" style="color:'+colors[i]+'">'+pct+'%</div></div>'}).join('')}
+  function renderDefects(){const data=filteredDefects().slice(0,16),major=todayContext().filter(d=>d.severity==='Major').length;$('#majorToday').textContent=major+' MAJOR TODAY';$('#defectList').innerHTML=data.length?data.map(d=>'<article class="defect-card '+d.severity.toLowerCase()+'"><div><div class="defect-top"><span class="badge '+(d.severity==='Major'?'red':d.severity==='Minor'?'amber':'green')+'">'+esc(d.id)+'</span><span class="badge '+(d.severity==='Major'?'red':d.severity==='Minor'?'amber':'green')+'">'+esc(d.severity.toUpperCase())+'</span><span class="badge blue">'+esc(d.type.toUpperCase())+'</span><span class="badge '+(d.action==='Rejected'?'red':d.action==='Re-inspect'?'amber':'green')+'">'+esc(d.action.toUpperCase())+'</span><span class="defect-component">'+esc(d.component)+'</span></div><div class="defect-meta"><div><div class="meta-label">Defect Type</div><div class="meta-value">'+esc(d.type)+'</div></div><div><div class="meta-label">Workflow</div><div class="meta-value">'+esc(d.status)+' · '+esc(d.sap)+'</div></div><div><div class="meta-label">AI Confidence</div><div class="meta-value '+(d.confidence>=96?'positive':d.confidence<92?'warning':'')+'">'+d.confidence+'%</div></div></div></div><div class="defect-side"><div class="defect-time">'+fmtDate(d.date)+' · '+esc(d.line)+'</div><div class="defect-actions"><button class="btn small" data-evidence="'+d.id+'">Evidence</button><button class="btn small" data-assign="'+d.id+'">Assign</button><button class="btn small danger" data-ncr="'+d.id+'">NCR</button></div></div></article>').join(''):'<div class="card" style="padding:30px;text-align:center;color:#657994">No defects match the selected filters.</div>'}
+  function renderLines(){const all=filteredDefects(),lines=visibleLines();$('#lineGrid').innerHTML=lines.map(line=>{const i=LINES.indexOf(line),today=all.filter(d=>d.line===line&&isToday(d.date)).length,q=BASE_QUALITY[line],escapes=Math.max(0,Math.round(today*.15)),color=q>=99?'#0fa24b':q>=98?'#e47b00':'#e2282e';return '<article class="card line-card"><div class="line-card-head"><span class="line-name">'+line+'</span><span class="badge blue">MODEL V'+(i===2?'3.0':'3.1')+'</span></div><div class="line-metrics"><div class="line-metric"><div class="label">Quality Rate</div><div class="value" style="color:'+color+'">'+q.toFixed(1)+'%</div></div><div class="line-metric"><div class="label">Defects Today</div><div class="value" style="color:'+color+'">'+today+'</div></div><div class="line-metric"><div class="label">Escapes</div><div class="value" style="color:#dc252a">'+escapes+'</div></div></div><div class="line-progress"><span style="width:'+q+'%;background:'+color+'"></span></div></article>'}).join('')}
+  function renderModel(){const plantAdj=state.filters.plant==='Plant 1'?.3:state.filters.plant==='Plant 2'?-.2:0,imp=[['Surface texture',34],['Edge sharpness',28],['Dimensional delta',18],['Colour histogram',12],['Spatial alignment',8]];$('#importanceList').innerHTML=imp.map(x=>'<div><div class="importance-top"><span>'+x[0]+'</span><strong>'+x[1]+'%</strong></div><div class="progress"><div class="progress-fill" style="width:'+x[1]+'%;background:#006da8"></div></div></div>').join('');const base=[['Surface crack',98.1,97.4,.8,4820,'Excellent'],['Dimensional tolerance',94.2,93.8,1.9,3940,'Good'],['Surface scratch',93.8,92.7,2.1,3560,'Good'],['Assembly misalignment',95.4,94.6,1.4,3210,'Good'],['Porosity',91.2,89.8,3.4,2870,'Needs attention']];$('#classPerformanceBody').innerHTML=base.map(r=>{const scale=state.filters.plant==='All'?1:state.filters.plant==='Plant 1'?.56:.44;return '<tr><td><strong>'+r[0]+'</strong></td><td>'+(r[1]+plantAdj).toFixed(1)+'%</td><td>'+(r[2]+plantAdj).toFixed(1)+'%</td><td>'+Math.max(.4,r[3]-plantAdj).toFixed(1)+'%</td><td>'+Math.round(r[4]*scale).toLocaleString('en-US')+'</td><td><span class="badge '+(r[5]==='Excellent'?'green':r[5]==='Good'?'blue':'amber')+'">'+r[5]+'</span></td></tr>'}).join('');const baseHistory=[['Apr 10','DEPLOYED','mAP 0.964 · Precision 0.971 · 18,400 samples','deployed'],['Mar 27','ARCHIVED','mAP 0.948 · Precision 0.953 · 17,200 samples',''],['Mar 13','ARCHIVED','mAP 0.931 · Precision 0.938 · 16,100 samples','']];$('#trainingHistoryList').innerHTML=state.retrainRequests.map(r=>'<div class="history-item pending"><div class="history-line"><span class="history-date">'+esc(r.date)+'</span><span class="badge amber">PENDING APPROVAL</span></div><div class="history-meta">'+esc(r.className)+' · '+esc(r.plant)+' · Requested by '+esc(r.requestor)+'</div></div>').join('')+baseHistory.map(r=>'<div class="history-item '+r[3]+'"><div class="history-line"><span class="history-date">'+r[0]+'</span><span class="badge '+(r[1]==='DEPLOYED'?'green':'')+'">'+r[1]+'</span></div><div class="history-meta">'+r[2]+'</div></div>').join('')}
+
+  function renderLibrary(){const data=filteredDefects().filter(d=>d.ncr!=='—').slice(0,30);$('#libraryBody').innerHTML=data.length?data.map(d=>'<tr><td><strong>'+esc(d.ncr)+'</strong></td><td>'+esc(d.id)+'<br><span style="color:#70839a;font-size:11px">'+esc(d.type)+'</span></td><td>'+esc(d.plant)+' / '+esc(d.line)+'</td><td>'+esc(d.component)+'</td><td>'+esc(d.owner)+'</td><td><span class="badge '+(d.status==='Closed'?'green':d.status==='Assigned'?'blue':'amber')+'">'+esc(d.status)+'</span></td><td>'+esc(d.sap)+'</td><td>'+(d.status==='Closed'?'6h 18m':'—')+'</td><td><button class="btn small" data-evidence="'+d.id+'">View</button></td></tr>').join(''):'<tr><td colspan="9" style="text-align:center;padding:24px;color:#657994">No NCR records match the selected filters.</td></tr>'}
+  function renderExecutive(){const data=filteredDefects(),p=profile(),factor=nonPlantFactor(),lines=visibleLines();$('#costAvoided').textContent='$'+Math.max(8,Math.round(p.cost*factor))+'K';$('#hoursSaved').textContent=Math.max(24,Math.round(p.hours*factor)).toLocaleString('en-US');$('#escapesPrevented').textContent=Math.max(3,Math.round(p.escapes*factor));$('#yieldGain').textContent='+'+(1.1+.7*factor).toFixed(1)+'%';$('#executiveLineChart').innerHTML=lines.map(l=>{const c=data.filter(d=>d.line===l).length,score=Math.max(84,100-c*1.1);return '<div class="break-row"><div><div class="break-label">'+l+'</div><div class="progress"><div class="progress-fill" style="width:'+score+'%;background:'+(score>94?'#0fa24b':score>89?'#e47b00':'#df252b')+'"></div></div></div><div class="break-value" style="color:#344f6b">'+score.toFixed(1)+'</div></div>'}).join('');const topType=TYPES.map(t=>[t,data.filter(d=>d.type===t).length]).sort((a,b)=>b[1]-a[1])[0]||['No defects',0],topLine=lines.map(l=>[l,data.filter(d=>d.line===l).length]).sort((a,b)=>b[1]-a[1])[0]||['No line',0];const insights=['Highest defect concentration is on '+topLine[0]+' ('+topLine[1]+' events in context).',topType[0]+' is the leading defect class in the selected scope.','Model V3.1 is active on '+lines.filter(l=>l!=='Line C').length+' selected line(s).','NCR workflow shows '+data.filter(d=>d.sap==='Pending').length+' SAP QM records pending synchronisation.'];$('#managementInsights').innerHTML=insights.map(x=>'<div class="insight-row"><span class="insight-dot"></span><div>'+esc(x)+'</div></div>').join('')}
+  function renderInspection(){const cams=visibleCameras();$('#inspectionCameraBadge').textContent=cams.filter(c=>!c.paused&&c.status!=='Offline').length+' / '+cams.length+' CAMERAS ONLINE';$('#cameraWall').innerHTML=cams.map((c,i)=>'<div class="camera-card" data-camera="'+c.id+'"><div class="camera-scene"></div><div class="camera-belt"></div><div class="camera-part"></div>'+(i===1?'<div class="camera-box"></div>':'')+'<div class="camera-label">'+c.id+' · '+c.line+'</div><div class="camera-status">'+(c.paused?'PAUSED':c.status.toUpperCase())+'</div><div class="camera-footer"><span>'+c.fps+' FPS</span><span>'+c.latency.toFixed(1)+' ms</span></div></div>').join('');const d=todayContext()[0]||filteredDefects()[0];$('#latestDecision').innerHTML=d?'<strong>'+esc(d.id)+' · '+esc(d.type)+'</strong><br>'+esc(d.component)+' on '+esc(d.line)+'<br>Decision: <span class="'+(d.action==='Rejected'?'negative':'warning')+'"><strong>'+esc(d.action)+'</strong></span><br>Confidence: '+d.confidence+'% · '+esc(d.camera):'<strong>No decision in selected context</strong><br>Adjust the filters or switch plant.'}
+  function renderHealth(){const cams=visibleCameras(),plants=state.filters.plant==='All'?['Plant 1','Plant 2']:[state.filters.plant],devices=[...cams.map(c=>[c.id,c.line+' · '+c.plant,c.paused?'Paused':c.status,c.fps+' FPS',c.latency.toFixed(1)+' ms']),...plants.map(p=>['Jetson-Edge-'+(p==='Plant 1'?'01':'02'),p,'Healthy','GPU '+(p==='Plant 1'?62:58)+'%',p==='Plant 1'?'42°C':'40°C'])];$('#healthGrid').innerHTML=devices.map(x=>'<article class="card health-card" data-device="'+esc(x[0])+'"><div><div class="health-title">'+esc(x[0])+'</div><div class="health-meta">'+esc(x[1])+'</div></div><div style="display:flex;align-items:center;gap:20px"><div class="health-meta">'+esc(x[3])+' · '+esc(x[4])+'</div><span class="badge '+(x[2]==='Warning'?'amber':x[2]==='Paused'?'amber':'green')+'">'+esc(x[2])+'</span></div></article>').join('')}
+  function renderRightPanel(){const p=profile(),plant=state.filters.plant;$('#recommendCount').textContent=plant==='All'?6:3;const recs=plant==='Plant 1'?[['Reactor Temp','+1.2%','183.7 → 186 °C. Blocked due to a product-quality temperature guardrail.'],['Mixing Speed','+3.4%','381.5 → 395 RPM. Blocked because Line B surface-crack risk is elevated.'],['Feed Rate','+2.1%','Proposed increase conflicts with current dimensional-tolerance limits.']]:plant==='Plant 2'?[['Pressure','0.0%','8.4 → 8.4 bar. No measurable gain and safety guardrail remains active.'],['Cooling Time','+1.8%','Shorter cooling cycle conflicts with porosity-quality threshold.'],['Feed Rate','+2.5%','Proposed increase conflicts with Line C validation status.']]:[['Reactor Temp','+1.2%','183.7 → 186 °C. Blocked — semantic conflict active.'],['Pressure','0.0%','8.4 → 8.4 bar. Blocked — semantic conflict active.'],['Mixing Speed','+3.4%','381.5 → 395 RPM. Blocked — semantic conflict active.'],['Feed Rate','+2.5%','Proposed increase conflicts with current quality guardrail.']];$('#recommendList').innerHTML=recs.map((r,i)=>'<div class="recommend-card" data-recommend="'+i+'"><div class="recommend-top"><span class="priority">HIGH</span><span class="recommend-title">'+esc(r[0])+'</span><span class="recommend-gain">'+esc(r[1])+'</span></div><div class="recommend-desc">'+esc(r[2])+'</div><div class="block-note">Semantic Layer block active</div></div>').join('')}
+
+  function showEvidence(id){const d=state.defects.find(x=>x.id===id);if(!d)return;$('#evidenceTitle').textContent=d.id+' · '+d.type;$('#evidenceDetails').innerHTML='<div class="detail-row"><div class="detail-label">Component</div><div class="detail-value">'+esc(d.component)+'</div></div><div class="detail-row"><div class="detail-label">Production Context</div><div class="detail-value">'+esc(d.plant)+' · '+esc(d.line)+' · '+esc(d.shift)+'</div></div><div class="detail-row"><div class="detail-label">AI Decision</div><div class="detail-value">'+esc(d.action)+' at '+d.confidence+'% confidence</div></div><div class="detail-row"><div class="detail-label">Why Detected</div><div class="detail-value">Surface texture and edge pattern exceeded the approved model threshold for this component class.</div></div><div class="detail-row"><div class="detail-label">Workflow</div><div class="detail-value">'+esc(d.status)+' · SAP QM '+esc(d.sap)+'</div></div><div class="detail-row"><div class="detail-label">Camera & Time</div><div class="detail-value">'+esc(d.camera)+' · '+fmtDate(d.date)+'</div></div>';openOverlay('evidenceOverlay')}
+  function openOverlay(id){const el=$('#'+id);el.classList.add('open');el.setAttribute('aria-hidden','false')}
+  function closeOverlay(id){const el=$('#'+id);el.classList.remove('open');el.setAttribute('aria-hidden','true')}
+  function toast(title,detail){const el=document.createElement('div');el.className='toast';el.innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(detail)+'</span>';$('#toastStack').appendChild(el);setTimeout(()=>el.remove(),3200)}
+  function exportCSV(rows,name){const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+  function downloadText(content,name,type='text/html'){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+  function actionModal(title,subtitle,body,footer=''){ $('#actionTitle').textContent=title;$('#actionSubtitle').textContent=subtitle||'';$('#actionBody').innerHTML=body;$('#actionFooter').innerHTML=footer;openOverlay('actionOverlay') }
+  function closeAction(){closeOverlay('actionOverlay')}
+
+  function openControlRoom(){const cams=visibleCameras();const body='<div class="summary-grid"><div class="summary-tile"><div class="label">Selected Scope</div><div class="value">'+esc(state.filters.plant)+'</div></div><div class="summary-tile"><div class="label">Cameras</div><div class="value">'+cams.length+'</div></div><div class="summary-tile"><div class="label">Streaming</div><div class="value">'+cams.filter(c=>!c.paused).length+'</div></div><div class="summary-tile"><div class="label">Warnings</div><div class="value">'+cams.filter(c=>c.status==='Warning').length+'</div></div></div><div class="control-room-grid">'+cams.map(c=>'<div class="control-camera '+(c.paused?'paused':'')+'" data-control-camera="'+c.id+'"><div class="control-camera-head"><strong>'+c.id+' · '+c.line+'</strong><span class="camera-live-state">'+(c.paused?'PAUSED':c.status.toUpperCase())+'</span></div><div class="control-camera-visual"></div><div class="control-camera-foot"><span>'+c.fps+' FPS · '+c.latency.toFixed(1)+' ms</span><div><button class="btn small" data-camera-action="toggle" data-camera-id="'+c.id+'">'+(c.paused?'Resume':'Pause')+'</button><button class="btn small" data-camera-action="inspect" data-camera-id="'+c.id+'">Inspect</button></div></div></div>').join('')+'</div>';actionModal('Vision Control Room','Live camera operations for the selected plant and line.',body,'<button class="btn" data-action="pause-all">Pause All</button><button class="btn" data-action="resume-all">Resume All</button><button class="btn primary" data-action="close-action">Done</button>')}
+  function openCameraDetail(id){const c=CAMERAS.find(x=>x.id===id);if(!c)return;actionModal(c.id+' Camera Detail',c.plant+' · '+c.line,'<div class="summary-grid"><div class="summary-tile"><div class="label">Status</div><div class="value">'+(c.paused?'Paused':c.status)+'</div></div><div class="summary-tile"><div class="label">Frame Rate</div><div class="value">'+c.fps+'</div></div><div class="summary-tile"><div class="label">Latency</div><div class="value">'+c.latency.toFixed(1)+'ms</div></div><div class="summary-tile"><div class="label">Acknowledged</div><div class="value">'+(c.ack?'Yes':'No')+'</div></div></div><div class="action-card"><h4>Latest inspection context</h4><p>This camera is connected to '+c.line+' at '+c.plant+'. Its latest frame and inference health are within the current Quality Vision filter context.</p></div>','<button class="btn" data-action="ack-camera" data-camera-id="'+c.id+'">Acknowledge</button><button class="btn primary" data-camera-action="toggle" data-camera-id="'+c.id+'">'+(c.paused?'Resume Stream':'Pause Stream')+'</button>')}
+  function openDeviceDetail(id){const c=CAMERAS.find(x=>x.id===id);if(c){openCameraDetail(id);return}const plant=id.endsWith('01')?'Plant 1':'Plant 2',gpu=plant==='Plant 1'?62:58,temp=plant==='Plant 1'?42:40;actionModal(id+' Edge Device',plant+' · NVIDIA Jetson','<div class="summary-grid"><div class="summary-tile"><div class="label">Status</div><div class="value">Healthy</div></div><div class="summary-tile"><div class="label">GPU</div><div class="value">'+gpu+'%</div></div><div class="summary-tile"><div class="label">Temperature</div><div class="value">'+temp+'°C</div></div><div class="summary-tile"><div class="label">Model</div><div class="value">V3.1</div></div></div><div class="action-card"><h4>Edge inference status</h4><p>The device is processing camera streams for '+plant+'. ONNX/TensorRT inference is active and the current health values are within the configured operating range.</p></div>','<button class="btn" data-action="run-device-diagnostic" data-device-id="'+id+'">Run Diagnostic</button><button class="btn primary" data-action="close-action">Close</button>')}
+  function openModule(module){const p=profile(),body='<div class="summary-grid"><div class="summary-tile"><div class="label">Plant Context</div><div class="value">'+esc(state.filters.plant)+'</div></div><div class="summary-tile"><div class="label">OEE</div><div class="value">'+p.oee.toFixed(1)+'%</div></div><div class="summary-tile"><div class="label">Yield</div><div class="value">'+p.yield.toFixed(1)+'%</div></div><div class="summary-tile"><div class="label">Open Actions</div><div class="value">'+p.blocked+'</div></div></div><div class="action-card"><h4>'+esc(module)+' context</h4><p>This cross-agent module is represented as an interactive preview in the Quality Vision prototype. The selected plant context is preserved, and the key metrics shown above update whenever Plant 1, Plant 2 or All Plants is selected.</p></div>';actionModal(module,'Cross-agent module preview',body,'<button class="btn primary" data-action="close-action">Return to Quality Vision</button>')}
+  function openAlert(kind){const p=profile(),data=filteredDefects(),pending=data.filter(d=>d.sap==='Pending').length;let title='',body='';if(kind==='critical'){title='Critical Asset Summary';body='<div class="summary-grid"><div class="summary-tile"><div class="label">Critical Assets</div><div class="value">'+p.critical+'</div></div><div class="summary-tile"><div class="label">Affected Lines</div><div class="value">'+visibleLines().length+'</div></div><div class="summary-tile"><div class="label">Major Defects</div><div class="value">'+data.filter(d=>d.severity==='Major').length+'</div></div><div class="summary-tile"><div class="label">Pending NCRs</div><div class="value">'+pending+'</div></div></div>'}else if(kind==='safety'){title='Safety Action Summary';body='<div class="action-grid"><div class="action-card"><h4>'+p.safety+' open safety actions</h4><p>Actions are filtered to '+state.filters.plant+'. Quality-related process recommendations remain blocked until the active safety guardrails are cleared.</p></div><div class="action-card"><h4>Governance status</h4><p>The Semantic Layer is active and has blocked '+p.blocked+' cross-agent actions in the current operating context.</p></div></div>'}else if(kind==='oee'){title='OEE Performance';body='<div class="summary-grid"><div class="summary-tile"><div class="label">Current OEE</div><div class="value">'+p.oee.toFixed(1)+'%</div></div><div class="summary-tile"><div class="label">Yield</div><div class="value">'+p.yield.toFixed(1)+'%</div></div><div class="summary-tile"><div class="label">Quality</div><div class="value">'+averageQuality(visibleLines()).toFixed(1)+'%</div></div><div class="summary-tile"><div class="label">Inspection Labour</div><div class="value">-'+p.labour+'%</div></div></div>'}else{title='Semantic Layer Governance';body='<div class="action-grid"><div class="action-card"><h4>'+p.blocked+' actions currently blocked</h4><p>'+p.safety+' safety, '+p.pdm+' predictive-maintenance and '+p.yieldBlocks+' yield recommendations are being governed in '+state.filters.plant+'.</p></div><div class="action-card"><h4>Why this matters</h4><p>Recommendations that conflict with quality, process or safety constraints are held back before they can become plant actions.</p></div></div>'}actionModal(title,state.filters.plant+' · Live operating context',body,'<button class="btn primary" data-action="close-action">Close</button>')}
+  function openLineComparison(){const lines=visibleLines(),data=filteredDefects();const rows=lines.map(l=>{const q=BASE_QUALITY[l],count=data.filter(d=>d.line===l).length,delta=q-98.5;return '<tr><td><strong>'+l+'</strong></td><td>'+q.toFixed(1)+'%</td><td>'+count+'</td><td class="'+(delta>=0?'positive':'negative')+'">'+(delta>=0?'+':'')+delta.toFixed(1)+' pts</td><td>'+(q>=99?'Benchmark':q>=98?'Monitor':'Needs action')+'</td></tr>'}).join('');actionModal('Line Quality Comparison','Selected period: '+$('#filterPeriod option:checked').text()+' · '+state.filters.plant,'<table class="action-table"><thead><tr><th>Line</th><th>Quality Rate</th><th>Defects</th><th>vs 98.5%</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>','<button class="btn" data-action="download-line-comparison">Download CSV</button><button class="btn primary" data-action="close-action">Close</button>')}
+  function openRetrainForm(){const options=TYPES.map(t=>'<option>'+t+'</option>').join('');actionModal('Request Federated Retraining','Submit a governed request; the production model is not changed immediately.','<div class="form-grid"><div class="field"><label>Plant scope</label><select id="retrainPlant"><option>All Plants</option><option>Plant 1</option><option>Plant 2</option></select></div><div class="field"><label>Defect class</label><select id="retrainClass">'+options+'</select></div><div class="field"><label>Requested by</label><input id="retrainRequestor" value="Quality Engineer"></div><div class="field"><label>Priority</label><select id="retrainPriority"><option>Normal</option><option>High</option><option>Critical</option></select></div><div class="field full"><label>Reason</label><textarea id="retrainReason">Class-level review requested based on current performance and escape risk.</textarea></div></div>','<button class="btn" data-action="close-action">Cancel</button><button class="btn primary" data-action="submit-retrain">Submit Request</button>')}
+  function runHealthCheck(btn){btn.classList.add('loading');btn.textContent='Checking';setTimeout(()=>{state.healthChecks++;CAMERAS.forEach(c=>{if(!c.paused){c.fps=Math.max(72,Math.min(99,c.fps+Math.round(Math.random()*4-2)));c.latency=Math.max(7.2,Math.min(13.2,c.latency+(Math.random()-.5))).toFixed(1)*1}});btn.classList.remove('loading');btn.textContent='Run Health Check';renderAll();const cams=visibleCameras(),warning=cams.filter(c=>c.status==='Warning'||c.latency>11).length;actionModal('Health Check Complete','Check #'+state.healthChecks+' · '+new Date().toLocaleTimeString(),'<div class="summary-grid"><div class="summary-tile"><div class="label">Devices Checked</div><div class="value">'+(cams.length+(state.filters.plant==='All'?2:1))+'</div></div><div class="summary-tile"><div class="label">Healthy</div><div class="value">'+(cams.length-warning)+'</div></div><div class="summary-tile"><div class="label">Warnings</div><div class="value">'+warning+'</div></div><div class="summary-tile"><div class="label">Offline</div><div class="value">0</div></div></div><div class="action-card"><h4>Result</h4><p>'+(!warning?'All selected camera and edge devices are healthy.':'CAM-03B remains below the preferred frame-rate threshold and should be reviewed.')+'</p></div>','<button class="btn primary" data-action="close-action">Close</button>')},700)}
+  function downloadExecutiveReport(){const p=profile(),lines=visibleLines(),data=filteredDefects(),html='<!doctype html><html><head><meta charset="utf-8"><title>Quality Vision Executive Report</title><style>body{font-family:Arial;margin:40px;color:#193a59}h1{color:#006da8}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{border:1px solid #cddae5;border-radius:10px;padding:14px}.value{font-size:24px;font-weight:bold;color:#078a65}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{border-bottom:1px solid #dde6ee;padding:10px;text-align:left}</style></head><body><h1>Quality Vision Executive Report</h1><p>Context: '+esc(state.filters.plant)+' · Generated '+new Date().toLocaleString()+'</p><div class="grid"><div class="card">Cost avoided<div class="value">$'+Math.round(p.cost*nonPlantFactor())+'K</div></div><div class="card">Hours saved<div class="value">'+Math.round(p.hours*nonPlantFactor())+'</div></div><div class="card">Escapes prevented<div class="value">'+Math.round(p.escapes*nonPlantFactor())+'</div></div><div class="card">Quality rate<div class="value">'+averageQuality(lines).toFixed(1)+'%</div></div></div><table><tr><th>Line</th><th>Quality</th><th>Defects in context</th></tr>'+lines.map(l=>'<tr><td>'+l+'</td><td>'+BASE_QUALITY[l].toFixed(1)+'%</td><td>'+data.filter(d=>d.line===l).length+'</td></tr>').join('')+'</table><p><button onclick="window.print()">Print / Save PDF</button></p></body></html>';downloadText(html,'quality-vision-executive-report.html');toast('Executive report downloaded','Open the HTML report and use Print / Save PDF if required.')}
+
+  $$('.tab,.more-item').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+  $$('.right-tab').forEach(b=>b.addEventListener('click',()=>setRight(b.dataset.right)));
+  $$('.plant-chip').forEach(b=>b.addEventListener('click',()=>setPlant(b.dataset.plant)));
+  $$('[data-nav-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.navView)));
+  $$('[data-module]').forEach(b=>b.addEventListener('click',()=>openModule(b.dataset.module)));
+  $('#moreBtn').addEventListener('click',e=>{e.stopPropagation();$('#moreMenu').classList.toggle('open')});document.addEventListener('click',()=>$('#moreMenu').classList.remove('open'));
+  $('#filterBtn').addEventListener('click',()=>{syncLineOptions();openOverlay('filterOverlay')});
+  $$('[data-close-overlay]').forEach(b=>b.addEventListener('click',()=>closeOverlay(b.dataset.closeOverlay)));$$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeOverlay(o.id)}));
+  $('#filterPlant').addEventListener('change',()=>{const plant=$('#filterPlant').value,current=$('#filterLine').value;syncLineOptions(plant,current)});
+  $('#applyFilters').addEventListener('click',()=>{state.filters={plant:$('#filterPlant').value,line:$('#filterLine').value,shift:$('#filterShift').value,period:$('#filterPeriod').value,type:$('#filterType').value,severity:$('#filterSeverity').value,component:$('#filterComponent').value};$$('.plant-chip').forEach(b=>b.classList.toggle('active',b.dataset.plant===state.filters.plant));renderAll();closeOverlay('filterOverlay');toast('Filters applied','Every Quality Vision view now uses the same context.')});
+  $('#resetFilters').addEventListener('click',()=>{state.filters={plant:'All',line:'All',shift:'All',period:'today',type:'All',severity:'All',component:'All'};$('#filterPlant').value='All';$('#filterShift').value='All';$('#filterPeriod').value='today';$('#filterType').value='All';$('#filterSeverity').value='All';$('#filterComponent').value='All';syncLineOptions();$$('.plant-chip').forEach(b=>b.classList.toggle('active',b.dataset.plant==='All'));renderAll();closeOverlay('filterOverlay');toast('Filters reset','Showing consolidated data for both plants.')});
+  $('#refreshBtn').addEventListener('click',()=>{state.inspectionCount+=Math.floor(30+Math.random()*40);state.lastRefresh=new Date();renderAll();toast('Live data refreshed','New edge events and MES counters were applied across the selected scope.')});
+  $('#syncBtn').addEventListener('click',e=>{const btn=e.currentTarget;btn.classList.add('loading');btn.textContent='Syncing';setTimeout(()=>{filteredDefects().forEach(d=>{if(d.sap==='Pending')d.sap='Synced'});state.lastSync=new Date();btn.classList.remove('loading');btn.textContent='Sync MES';renderAll();toast('MES / SAP QM sync complete','Pending non-conformance records were synchronised.')},650)});
+  $('#exportBtn').addEventListener('click',()=>{const rows=[['Defect ID','NCR','Plant','Line','Shift','Type','Severity','Component','Confidence','Status','SAP QM'],...filteredDefects().map(d=>[d.id,d.ncr,d.plant,d.line,d.shift,d.type,d.severity,d.component,d.confidence,d.status,d.sap])];exportCSV(rows,'quality-vision-ncr-export.csv');toast('Export created','Filtered NCR records downloaded as CSV.')});
+  $('#libraryExport').addEventListener('click',()=>$('#exportBtn').click());$('#executiveExport').addEventListener('click',downloadExecutiveReport);$('#retrainBtn').addEventListener('click',openRetrainForm);$('#compareLinesBtn').addEventListener('click',openLineComparison);$('#healthRefresh').addEventListener('click',e=>runHealthCheck(e.currentTarget));$('#openControlRoomBtn').addEventListener('click',openControlRoom);
+  $('#criticalAssetsBtn').addEventListener('click',()=>openAlert('critical'));$('#safetyBtn').addEventListener('click',()=>openAlert('safety'));$('#oeeBtn').addEventListener('click',()=>openAlert('oee'));$('#semanticBtn').addEventListener('click',()=>{setRight('insights');openAlert('semantic')});
+  document.addEventListener('click',e=>{const ev=e.target.closest('[data-evidence]');if(ev)showEvidence(ev.dataset.evidence);const as=e.target.closest('[data-assign]');if(as){const d=state.defects.find(x=>x.id===as.dataset.assign);if(d){d.status='Assigned';d.owner='Quality Engineer';renderAll();toast('Defect assigned',d.id+' assigned to Quality Engineer.')}}const nr=e.target.closest('[data-ncr]');if(nr){const d=state.defects.find(x=>x.id===nr.dataset.ncr);if(d){if(d.ncr==='—')d.ncr='NCR-'+Math.floor(1300+Math.random()*400);d.sap='Pending';d.status='Assigned';renderAll();toast('NCR created',d.ncr+' is pending SAP QM sync.')}}const cam=e.target.closest('[data-camera]');if(cam)openCameraDetail(cam.dataset.camera);const dev=e.target.closest('[data-device]');if(dev)openDeviceDetail(dev.dataset.device);const rec=e.target.closest('[data-recommend]');if(rec){const card=rec;actionModal('Recommendation Governance Detail',state.filters.plant,'<div class="action-card"><h4>'+esc(card.querySelector('.recommend-title').textContent)+'</h4><p>'+esc(card.querySelector('.recommend-desc').textContent)+' The recommendation remains blocked until the relevant quality or safety constraint is cleared.</p></div>','<button class="btn primary" data-action="close-action">Close</button>')}});
+  $('#actionOverlay').addEventListener('click',e=>{const act=e.target.closest('[data-action]'),camAct=e.target.closest('[data-camera-action]');if(camAct){const c=CAMERAS.find(x=>x.id===camAct.dataset.cameraId);if(!c)return;if(camAct.dataset.cameraAction==='toggle'){c.paused=!c.paused;renderAll();openControlRoom();toast(c.paused?'Stream paused':'Stream resumed',c.id+' · '+c.line)}else openCameraDetail(c.id);return}if(!act)return;const a=act.dataset.action;if(a==='close-action')closeAction();if(a==='pause-all'){visibleCameras().forEach(c=>c.paused=true);renderAll();openControlRoom();toast('All selected streams paused','Inspection counters are held for the selected context.')}if(a==='resume-all'){visibleCameras().forEach(c=>c.paused=false);renderAll();openControlRoom();toast('All selected streams resumed','Live inspection is active again.')}if(a==='ack-camera'){const c=CAMERAS.find(x=>x.id===act.dataset.cameraId);if(c){c.ack=true;toast('Camera acknowledged',c.id+' acknowledgment recorded.');openCameraDetail(c.id)}}if(a==='run-device-diagnostic'){const id=act.dataset.deviceId;toast('Diagnostic completed',id+' passed GPU, temperature and model-runtime checks.');openDeviceDetail(id)}if(a==='download-line-comparison'){const rows=[['Line','Quality Rate','Defects','Delta vs 98.5'],...visibleLines().map(l=>[l,BASE_QUALITY[l].toFixed(1)+'%',filteredDefects().filter(d=>d.line===l).length,(BASE_QUALITY[l]-98.5).toFixed(1)])];exportCSV(rows,'line-quality-comparison.csv');toast('Comparison downloaded','Line comparison exported as CSV.')}if(a==='submit-retrain'){const className=$('#retrainClass').value,plant=$('#retrainPlant').value,requestor=$('#retrainRequestor').value.trim()||'Quality Engineer';state.retrainRequests.unshift({className,plant,requestor,date:new Date().toLocaleDateString('en-US',{month:'short',day:'2-digit'})});closeAction();renderAll();toast('Retraining request submitted',className+' request routed for Quality AI Admin approval.')}});
+  $$('.suggestion').forEach(b=>b.addEventListener('click',()=>askAI(b.textContent)));$('#chatForm').addEventListener('submit',e=>{e.preventDefault();const q=$('#chatText').value.trim();if(q){askAI(q);$('#chatText').value=''}});
+  function askAI(q){const box=$('#chatMessages');box.insertAdjacentHTML('beforeend','<div class="message user">'+esc(q)+'</div>');const data=filteredDefects(),lines=visibleLines(),topLine=lines.map(l=>[l,data.filter(d=>d.line===l).length]).sort((a,b)=>b[1]-a[1])[0]||['No line',0],topType=TYPES.map(t=>[t,data.filter(d=>d.type===t).length]).sort((a,b)=>b[1]-a[1])[0]||['No defects',0];let a='For '+state.filters.plant+', '+topLine[0]+' has the highest defect volume ('+topLine[1]+'). '+topType[0]+' is the leading defect class.';if(/retrain|class|model/i.test(q))a='Porosity has the lowest class-level precision in the model view and the highest escape risk. It is the strongest candidate for additional labelled samples and a governed retraining request.';if(/ncr|sap|sync/i.test(q))a=data.filter(d=>d.sap==='Pending').length+' NCR records are currently pending SAP QM sync in the selected context.';setTimeout(()=>{box.insertAdjacentHTML('beforeend','<div class="message ai">'+esc(a)+'</div>');box.scrollTop=box.scrollHeight},250);box.scrollTop=box.scrollHeight}
+
+  syncLineOptions();renderAll();setInterval(()=>{const running=visibleCameras().filter(c=>!c.paused).length;if(running){state.inspectionCount+=Math.floor(8+Math.random()*12);renderDashboard()}},12000);
+})();
+</script>
+</body>
+</html>
