@@ -1,41 +1,11 @@
-JD for QA role
- 
-Key Responsibilities:  
-Develop test strategies and engineering practices related to software test engineering, both manual and automated testing with a specific focus on data quality
-Develop robust test suites, design test plans, use cases, and scripts that will uncover potential defects or solution shortcomings.
-Generate and maintain test data sets. Configure and maintain test environments.
-Good understanding of SQL to be able to perform data validations.
-Report defects accurately and facilitate issue tracking to successful resolution.
-Create quality metrics to evaluate data pipelines, products and customer deliverables.
-Work closely with data engineers, data scientists and analysts to inform solution designs in terms of testability.
-Research, evaluate and utilize new technologies or tools in the quality assurance space.
- 
- 
-Qualifications 
-3+ years of experience in Quality Assurance of which at least 2+ years of experience in test automation development and data validation
-Experience in data reconciliation and data workflows
-Scripting or programming languages (Python)
-Experience with testing PowerBI reports 
-Proven track record of programmatically testing software products.
-Experience with JIRA or another defect tracking system.
-Exceptional analytical and problem-solving skills.
-Great collaboration and communication skills
- 
- 
- 
-SQL Data Validation
-Data Reconciliation
-Python Automation
-Data Quality Testing
-ETL/Data Pipeline Validation
-Power BI Validation
-Test Automation
-Jira Experience
-Manual QA Testing
- 
- 
-how would you rate for above skills
- 
-good , average , strong 
- 
- 
+| Skill                              | Proficiency Level | Relevant Experience / Current Exposure                                                                                                                                                                                |
+| ---------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SQL Data Validation**            | **Good**          | Around 10 months of hands-on SQL experience. Used SQL for data extraction, validation, joins, aggregations, and reconciliation of migrated data.                                                                      |
+| **Data Reconciliation**            | **Good**          | Hands-on experience reconciling migrated data using SQL, Excel, and basic Pandas, including comparison and accuracy checks between datasets.                                                                          |
+| **Python Automation**              | **Average**       | Around 5 months of basic Python/Pandas exposure. Used Pandas for missing-value checks, comparisons, simple summaries, and ad-hoc data analysis. Limited exposure to developing complete automation frameworks.        |
+| **Data Quality Testing**           | **Good**          | Performed data validation checks for accuracy and consistency and supported reporting of data quality during migration and analytics activities.                                                                      |
+| **ETL / Data Pipeline Validation** | **Average**       | Have basic knowledge of ETL concepts and practical exposure to validating data during extraction, transformation, migration, and reporting. Limited experience with complete end-to-end production pipeline testing.  |
+| **Power BI Validation**            | **Good**          | Around 10 months of Power BI experience. Built dashboards, KPIs, and basic DAX measures and validated the underlying data used for business reporting.                                                                |
+| **Test Automation**                | **Average**       | Have used Python/Pandas for programmatic data checks, but have limited hands-on experience with dedicated QA automation frameworks and automated test-suite development.                                              |
+| **Jira Experience**                | **Average**       | Familiar with the basic workflow of stories, tasks, validation status, defect tracking, and closure. Direct Jira project experience is limited/not specifically reflected in my current resume.                       |
+| **Manual QA Testing**              | **Average**       | Practical experience is mainly in manual data validation, reconciliation, data cleaning, accuracy checks, and reporting rather than traditional application/UI functional testing.                                    |
